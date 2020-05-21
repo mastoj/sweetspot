@@ -1,0 +1,5 @@
+group infrastructure.core
+Pulumi.AzureAd
+Pulumi.Azure
+Pulumi.Random
+Pulumi.Tls

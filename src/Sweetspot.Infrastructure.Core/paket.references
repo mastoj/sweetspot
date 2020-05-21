@@ -4,3 +4,4 @@ Pulumi.Azure
 Pulumi.Random
 Pulumi.Tls
 Pulumi.FSharp
+Pulumi.Kubernetes

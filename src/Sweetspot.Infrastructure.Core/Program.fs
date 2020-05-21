@@ -7,6 +7,7 @@ open Pulumi.Azure.ContainerService.Inputs
 open Pulumi.Azure.Network
 open Pulumi.Azure.Role
 open Pulumi.FSharp
+open Pulumi.Kubernetes.Yaml
 open Pulumi.Random
 open Pulumi.Tls
 
@@ -144,6 +145,11 @@ let infra () =
             resourceGroup
             kubernetesVersion
             nodeCount
+
+    ConfigFile("linkerd",
+        ConfigFileArgs(
+            File = input "manifests/linkerd.yaml"
+        )) |> ignore
 
     // Export the kubeconfig string for the storage account
     dict [("kubeconfig", cluster.KubeConfigRaw :> obj)]

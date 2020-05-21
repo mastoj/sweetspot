@@ -4,6 +4,7 @@ RESTRICTION: || (== netcoreapp3.1) (== netstandard2.0) (== netstandard2.1)
 GROUP infrastructure.core
 NUGET
   remote: https://www.nuget.org/api/v2
+    FSharp.Core (4.7.1) - restriction: >= netcoreapp3.1
     Google.Protobuf (3.12.1) - restriction: >= netcoreapp3.1
       System.Memory (>= 4.5.2) - restriction: || (>= net45) (>= netstandard2.0)
     Grpc (2.29) - restriction: >= netcoreapp3.1
@@ -33,6 +34,9 @@ NUGET
     Pulumi.AzureAD (2.2)
       Pulumi (>= 2.2.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
+    Pulumi.FSharp (2.2.1)
+      FSharp.Core (>= 4.7) - restriction: >= netcoreapp3.1
+      Pulumi (>= 2.2.1) - restriction: >= netcoreapp3.1
     Pulumi.Random (2.1.1)
       Pulumi (>= 2.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1

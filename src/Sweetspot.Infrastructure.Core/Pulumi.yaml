@@ -1,0 +1,3 @@
+name: Sweetspot.core
+runtime: dotnet
+description: Sample kubernetes as platform

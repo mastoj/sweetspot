@@ -10,6 +10,7 @@ open Pulumi.FSharp
 open Pulumi.Kubernetes.Yaml
 open Pulumi.Random
 open Pulumi.Tls
+open Pulumi
 
 [<RequireQualifiedAccess>]
 module Helpers =
@@ -66,12 +67,39 @@ module Helpers =
                 AddressPrefixes = inputList [ input "10.2.1.0/24" ]
             ))
 
+    let createContainerRegistry name (resourceGroup: ResourceGroup) =
+        Registry(name, 
+            RegistryArgs(
+                Sku = input "basic",
+                ResourceGroupName = io resourceGroup.Name
+            ))
+
+    let private createAssignment 
+                    name 
+                    roleDefintion 
+                    (principalId: Output<string>)
+                    (scope: Output<string>) =
+        Assignment(name, 
+            AssignmentArgs(
+                PrincipalId = io principalId,
+                RoleDefinitionName = input roleDefintion,
+                Scope = io scope
+            ))
+
+    let createContainerRegistryAssignment name (containerRegistry: Registry) (sp: ServicePrincipal) =
+        createAssignment name "AcrPull" sp.Id containerRegistry.Id 
+
+    let createNetworkAssignment name (subnet: Subnet) (sp: ServicePrincipal) =
+        createAssignment name "Network Contributor" sp.Id subnet.Id 
+
     let createCluster
             name
             (subnet: Subnet)
             (privateKey: PrivateKey)
             (app: Application)
             (servicePrincipalPassword: ServicePrincipalPassword)
+            (acrAssignment: Assignment)
+            (networkAssignment: Assignment)
             (resourceGroup: ResourceGroup)
             kubernetesVersion
             nodeCount =
@@ -118,6 +146,9 @@ module Helpers =
                 KubernetesVersion = input kubernetesVersion,
                 RoleBasedAccessControl = input rbacArgs,
                 NetworkProfile = input networkProfileArgs
+            ),
+            CustomResourceOptions(
+                DependsOn = inputList [ input (acrAssignment :> Resource) ; input (networkAssignment :> Resource) ]
             ))
 
 let infra () =
@@ -131,6 +162,9 @@ let infra () =
     let networkRole = Helpers.assignNetworkContributorRole "role-assignment" servicePrincipal resourceGroup
     let vnet = Helpers.createVnet "fsaksvnet" resourceGroup
     let subnet = Helpers.createSubnet "fsakssubnet" vnet resourceGroup
+    let containerRegistry = Helpers.createContainerRegistry "sweetspotacr" resourceGroup
+    let containerRegistryAssignment = Helpers.createContainerRegistryAssignment "sweetspotacrassignment" containerRegistry servicePrincipal
+    let networkAssignment = Helpers.createNetworkAssignment "subnetassignment" subnet servicePrincipal
 
     let nodeCount = 3
     let kubernetesVersion = "1.16.7"
@@ -142,6 +176,8 @@ let infra () =
             privateKey
             app
             servicePrincipalPassword
+            containerRegistryAssignment
+            networkAssignment
             resourceGroup
             kubernetesVersion
             nodeCount
@@ -151,10 +187,10 @@ let infra () =
             File = input "manifests/linkerd.yaml"
         )) |> ignore
 
-    ConfigFile("proxy_inject",
-        ConfigFileArgs(
-            File = input "manifests/proxy_inject.yaml"
-        )) |> ignore
+    // ConfigFile("proxy_inject",
+    //     ConfigFileArgs(
+    //         File = input "manifests/proxy_inject.yaml"
+    //     )) |> ignore
 
     // Export the kubeconfig string for the storage account
     dict [("kubeconfig", cluster.KubeConfigRaw :> obj)]

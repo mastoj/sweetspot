@@ -151,6 +151,11 @@ let infra () =
             File = input "manifests/linkerd.yaml"
         )) |> ignore
 
+    ConfigFile("proxy_inject",
+        ConfigFileArgs(
+            File = input "manifests/proxy_inject.yaml"
+        )) |> ignore
+
     // Export the kubeconfig string for the storage account
     dict [("kubeconfig", cluster.KubeConfigRaw :> obj)]
 

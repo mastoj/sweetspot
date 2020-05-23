@@ -7,3 +7,5 @@ obj
 packages
 paket-files
 .paket
+
+.build/

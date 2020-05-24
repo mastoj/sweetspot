@@ -193,7 +193,11 @@ let infra () =
     //     )) |> ignore
 
     // Export the kubeconfig string for the storage account
-    dict [("kubeconfig", cluster.KubeConfigRaw :> obj)]
+    dict [
+        ("kubeconfig", cluster.KubeConfigRaw :> obj)
+        ("registryId", containerRegistry.Id :> obj)
+        ("registryName", containerRegistry.Name :> obj)
+    ]
 
 [<EntryPoint>]
 let main _ =

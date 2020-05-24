@@ -8,6 +8,7 @@ open Fake.Core
 open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
+open System.IO
 
 
 // Properties
@@ -20,8 +21,17 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "BuildApp" (fun _ ->
+    let buildProject projFile =
+        let projectFileInfo = FileInfo(projFile)
+        let parentDir = projectFileInfo.Directory
+        let appName = parentDir.Name
+        let buildDir = sprintf "%s%s/" buildDir appName
+
+        MSBuild.runRelease id buildDir "Publish" [projFile]
+
     !! "src/app/**/*.fsproj"
-        |> MSBuild.runRelease id buildDir "Publish"
+        |> Seq.map buildProject
+        |> Seq.concat
         |> Trace.logItems "AppBuild-Output: "
 )
 

@@ -11,10 +11,10 @@ open Pulumi.Kubernetes.Types.Inputs.ApiExtensions.V1Beta1
 
 let infra () =
 
-  let appLabels = inputMap ["app", input "nginx" ]
+  let appLabels = inputMap ["app", input "sweetspot.web" ]
 
   let deployment = 
-    Pulumi.Kubernetes.Apps.V1.Deployment("nginx",
+    Pulumi.Kubernetes.Apps.V1.Deployment("sweetspot.web",
       DeploymentArgs
         (Spec = input (DeploymentSpecArgs
           (Selector = input (LabelSelectorArgs(MatchLabels = appLabels)),
@@ -28,8 +28,8 @@ let infra () =
                       inputList [
                         input (
                           ContainerArgs
-                            (Name = input "nginx",
-                             Image = input "nginx",
+                            (Name = input "web",
+                             Image = input "sweetspotacr44b53716.azurecr.io/sweetspot.web",
                              Ports = 
                               inputList [
                                 input (

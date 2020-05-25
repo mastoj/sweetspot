@@ -187,6 +187,12 @@ let infra () =
             File = input "manifests/linkerd.yaml"
         )) |> ignore
 
+    ConfigFile("k8sdashboard",
+        ConfigFileArgs(
+            File = input "manifests/dashboard.yaml"
+        )) |> ignore
+
+
     // ConfigFile("proxy_inject",
     //     ConfigFileArgs(
     //         File = input "manifests/proxy_inject.yaml"

@@ -1,0 +1,6 @@
+name: sweetspot
+services:
+- name: csharpworker
+  project: src/app/Sweetspot.CSharpworker/Sweetspot.CSharpworker.csproj
+- name: web
+  project: src/app/Sweetspot.Web/Sweetspot.Web.fsproj

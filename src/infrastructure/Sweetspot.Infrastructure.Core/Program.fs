@@ -14,7 +14,11 @@ open Pulumi
 
 [<RequireQualifiedAccess>]
 module Helpers =
-    let createResourceGroup name = ResourceGroup(name)
+    let createResourceGroup name = 
+        ResourceGroup(name, 
+            ResourceGroupArgs(
+                Name = input name
+            ))
 
     let createPassword name =
         RandomPassword(name, 
@@ -146,6 +150,8 @@ module Helpers =
                 KubernetesVersion = input kubernetesVersion,
                 RoleBasedAccessControl = input rbacArgs,
                 NetworkProfile = input networkProfileArgs
+                // ,
+                // Name = input name
             ),
             CustomResourceOptions(
                 DependsOn = inputList [ input (acrAssignment :> Resource) ; input (networkAssignment :> Resource) ]
@@ -162,7 +168,7 @@ let infra () =
     let networkRole = Helpers.assignNetworkContributorRole "role-assignment" servicePrincipal resourceGroup
     let vnet = Helpers.createVnet "fsaksvnet" resourceGroup
     let subnet = Helpers.createSubnet "fsakssubnet" vnet resourceGroup
-    let containerRegistry = Helpers.createContainerRegistry "sweetspotacr" resourceGroup
+    let containerRegistry = Helpers.createContainerRegistry "mainacr" resourceGroup
     let containerRegistryAssignment = Helpers.createContainerRegistryAssignment "sweetspotacrassignment" containerRegistry servicePrincipal
     let networkAssignment = Helpers.createNetworkAssignment "subnetassignment" subnet servicePrincipal
 
@@ -171,7 +177,7 @@ let infra () =
 
     let cluster =
         Helpers.createCluster
-            "sweetspot"
+            "main"
             subnet
             privateKey
             app
@@ -193,10 +199,10 @@ let infra () =
         )) |> ignore
 
 
-    // ConfigFile("proxy_inject",
-    //     ConfigFileArgs(
-    //         File = input "manifests/proxy_inject.yaml"
-    //     )) |> ignore
+    ConfigFile("app",
+        ConfigFileArgs(
+            File = input "manifests/app.yaml"
+        )) |> ignore
 
     // Export the kubeconfig string for the storage account
     dict [

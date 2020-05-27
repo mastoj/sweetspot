@@ -29,7 +29,8 @@ Target.create "BuildApp" (fun _ ->
 
         MSBuild.runRelease id buildDir "Publish" [projFile]
 
-    !! "src/app/**/*.fsproj"
+    !! "src/app/**/*.*proj"
+        // |> MSBuild.runRelease id buildDir "Publish"
         |> Seq.map buildProject
         |> Seq.concat
         |> Trace.logItems "AppBuild-Output: "

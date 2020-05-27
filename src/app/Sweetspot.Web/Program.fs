@@ -79,14 +79,9 @@ let app =
         
         services.AddScoped<WeatherClient>(fun sp -> 
             let configuration = sp.GetService<IConfiguration>()
-            let baseUri = TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "csharpworker", "https")
-            let hostUri = 
-                if isNull baseUri
-                then Uri(configuration.["csharpworker"])
-                else baseUri
-            printfn "==> BackendUri: %A" baseUri
-            printfn "==> hostUri: %A" hostUri
-            WeatherClient.client hostUri)
+            let baseUri = TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "csharpworker", null)
+            printfn "==> Uri from tye: %A" baseUri
+            WeatherClient.client baseUri)
 
     //     services.Add<WeatherClient>(() => { services.Get<HttpClient>() with BaseAddress = Configuration.GetServiceUri("sweetspot.csharpworker")})
     // let httpClient = 

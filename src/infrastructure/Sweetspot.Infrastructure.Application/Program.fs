@@ -128,17 +128,14 @@ let infra () =
   let webAppLabels = ["app", webAppName ]
   let envVariables = [
     input (EnvVarArgs(
-      Name = input "csharpworker", 
-      //Name = input "service__csharpworker__host", 
-      //Value = io csharpWorkerWebName))
-      Value = io (csharpWorkerServiceName.Apply(fun s -> sprintf "http://%s" s))))
-    // input (EnvVarArgs(
-    //   Name = input "service__csharpworker__port", 
-    //   Value = input "80"))
+      Name = input "service__csharpworker__host", 
+      Value = io (csharpWorkerServiceName)))
+    input (EnvVarArgs(
+      Name = input "service__csharpworker__port", 
+      Value = input "80"))
   ]
   let webDeployment = createDeployment webAppName webImageName webAppLabels envVariables
   let webService = createService webAppName "LoadBalancer" webAppLabels
- 
 
   let webName = 
     webDeployment.Metadata

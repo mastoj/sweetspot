@@ -89,6 +89,11 @@ let infra () =
 
     Service(serviceName,
       ServiceArgs(
+        Metadata = input (
+          ObjectMetaArgs(
+            Name = input serviceName
+          )
+        ),
         Spec = input (
           ServiceSpecArgs(
             Type = input serviceType,

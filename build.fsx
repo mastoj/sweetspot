@@ -1,18 +1,35 @@
 #r "paket:
 nuget Fake.IO.FileSystem
 nuget Fake.DotNet.MSBuild
-nuget Fake.Core.Target //"
+nuget Fake.Core.Target 
+nuget Fake.Tools.Git //"
 #load "./.fake/build.fsx/intellisense.fsx"
 
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
+open Fake.Tools.Git
 open System.IO
 
 
 // Properties
 let buildDir = "./.build/"
+let publishDir = sprintf "%s/publish/" buildDir
+
+// Helper functions
+let runTool cmd args workingDir =
+    let arguments = args |> String.split ' ' |> Arguments.OfArgs
+    Command.RawCommand (cmd, arguments)
+    |> CreateProcess.fromCommand
+    |> CreateProcess.withWorkingDirectory workingDir
+    |> CreateProcess.ensureExitCode
+    |> Proc.run
+    |> ignore
+
+let buildDocker dockerFile tag =
+    let args = sprintf "build -t %s -f %s ." tag dockerFile
+    runTool "docker" args __SOURCE_DIRECTORY__
 
 // *** Define Targets ***
 Target.create "Clean" (fun _ ->
@@ -21,19 +38,38 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "BuildApp" (fun _ ->
-    let buildProject projFile =
-        let projectFileInfo = FileInfo(projFile)
-        let parentDir = projectFileInfo.Directory
-        let appName = parentDir.Name
-        let buildDir = sprintf "%s%s/" buildDir appName
+    let buildMode = Environment.environVarOrDefault "buildMode" "Release"
+    let setParams (defaults:MSBuildParams) =
+            { defaults with
+                Verbosity = Some(MSBuildVerbosity.Normal)
+                Targets = ["Publish"]
+                Properties =
+                    [
+                        "Optimize", "True"
+                        "DebugSymbols", "True"
+                        "Configuration", buildMode
+                        "PublishDir", publishDir 
+                    ]
+            }
+    MSBuild.build setParams "./sweetspot.sln"
+)
 
-        MSBuild.runRelease id buildDir "Publish" [projFile]
+let getDockerTag app =
+    let gitHash = Information.getCurrentHash()
+    sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
 
-    !! "src/app/**/*.*proj"
-        // |> MSBuild.runRelease id buildDir "Publish"
-        |> Seq.map buildProject
-        |> Seq.concat
-        |> Trace.logItems "AppBuild-Output: "
+let dockerMap = [
+    "sweetspot.web", "Dockerfile.Web"
+    "sweetspot.csharpworker", "Dockerfile.CSharpWorker"
+]
+
+Target.create "DockerBuild" (fun _ ->
+    dockerMap
+    |> List.iter(fun (appName, dockerFile) ->
+        let dockerTag = getDockerTag appName
+        let dockerFilePath = sprintf "./dockerfiles/%s" dockerFile
+        buildDocker dockerFilePath dockerTag
+    )
 )
 
 Target.create "Publish" (fun _ ->

@@ -1,0 +1,10 @@
+
+.fake
+.ionide
+bin
+obj
+.vscode
+packages
+paket-files
+.paket
+src/infrastructure/

@@ -27,8 +27,8 @@ let runTool cmd args workingDir =
     |> Proc.run
     |> ignore
 
-let buildDocker dockerFile tag =
-    let args = sprintf "build -t %s -f %s ." tag dockerFile
+let buildDocker dockerFile tag contextPath =
+    let args = sprintf "build -t %s -f %s %s" tag dockerFile contextPath
     runTool "docker" args __SOURCE_DIRECTORY__
 
 // *** Define Targets ***
@@ -64,11 +64,14 @@ let dockerMap = [
 ]
 
 Target.create "DockerBuild" (fun _ ->
-    dockerMap
-    |> List.iter(fun (appName, dockerFile) ->
+    !! "./src/app/**/Dockerfile"
+    |> Seq.map FileInfo
+    |> Seq.iter (fun f -> 
+        let appName = f.Directory.Name.ToLowerInvariant()
         let dockerTag = getDockerTag appName
-        let dockerFilePath = sprintf "./dockerfiles/%s" dockerFile
-        buildDocker dockerFilePath dockerTag
+        let dockerFileName = f.FullName
+        let contextPath = f.DirectoryName
+        buildDocker dockerFileName dockerTag  contextPath
     )
 )
 

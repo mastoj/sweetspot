@@ -1,0 +1,4 @@
+config:
+  Sweetspot.Infrastructure.Application:GIT_SHA: latest
+  Sweetspot.Infrastructure.Application:mode: PackageApp
+  Sweetspot.Infrastructure.Application:sha: jfsjfsldfjlskdjf

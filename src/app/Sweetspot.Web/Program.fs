@@ -83,16 +83,8 @@ let app =
             printfn "==> Uri from tye: %A" baseUri
             WeatherClient.client baseUri)
 
-    //     services.Add<WeatherClient>(() => { services.Get<HttpClient>() with BaseAddress = Configuration.GetServiceUri("sweetspot.csharpworker")})
-    // let httpClient = 
-    //     HttpClient(
-    //         BaseAddress = Configuration.GetServiceUri("sweetspot.csharpworker")
-    //     )
-
     application {
         service_config configureServices
-        // use_config (fun c -> 
-        //     printfn "==> FROM ENVIRON: %s" (c.GetValue("sweetspot.csharpworker")))
         use_router (apiRoutes)
         use_router webRoutes
     }

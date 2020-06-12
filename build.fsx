@@ -1,6 +1,6 @@
 #r "paket:
 nuget Fake.IO.FileSystem
-nuget Fake.DotNet.MSBuild
+nuget Fake.DotNet.Cli
 nuget Fake.Core.Target 
 nuget Fake.Tools.Git //"
 #load "./.fake/build.fsx/intellisense.fsx"
@@ -39,31 +39,29 @@ Target.create "Clean" (fun _ ->
 
 Target.create "BuildApp" (fun _ ->
     let buildMode = Environment.environVarOrDefault "buildMode" "Release"
-    let setParams (defaults:MSBuildParams) =
+    let setParams (defaults:DotNet.BuildOptions) =
             { defaults with
-                Verbosity = Some(MSBuildVerbosity.Normal)
-                Targets = ["Publish"]
-                Properties =
-                    [
-                        "Optimize", "True"
-                        "DebugSymbols", "True"
-                        "Configuration", buildMode
-                        "PublishDir", publishDir 
-                    ]
+                MSBuildParams = {
+                    defaults.MSBuildParams with
+                        Verbosity = Some(MSBuildVerbosity.Normal)
+                        Targets = ["Publish"]
+                        Properties =
+                            [
+                                "Optimize", "True"
+                                "DebugSymbols", "True"
+                                "Configuration", buildMode
+//                                "PublishDir", publishDir 
+                            ]
+                }
             }
-    MSBuild.build setParams "./sweetspot.sln"
+    DotNet.build setParams "./sweetspot.sln"
 )
 
-let getDockerTag app =
-    let gitHash = Information.getCurrentHash()
-    sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
-
-let dockerMap = [
-    "sweetspot.web", "Dockerfile.Web"
-    "sweetspot.csharpworker", "Dockerfile.CSharpWorker"
-]
-
 Target.create "DockerBuild" (fun _ ->
+    let getDockerTag app =
+        let gitHash = Information.getCurrentHash()
+        sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
+
     !! "./src/app/**/Dockerfile"
     |> Seq.map FileInfo
     |> Seq.iter (fun f -> 
@@ -74,6 +72,7 @@ Target.create "DockerBuild" (fun _ ->
         buildDocker dockerFileName dockerTag  contextPath
     )
 )
+
 
 Target.create "Publish" (fun _ ->
     Trace.log " --- Publishing app --- "

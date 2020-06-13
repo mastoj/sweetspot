@@ -31,6 +31,10 @@ let buildDocker dockerFile tag contextPath =
     let args = sprintf "build -t %s -f %s %s" tag dockerFile contextPath
     runTool "docker" args __SOURCE_DIRECTORY__
 
+let runPulumi path gitSha =
+    let args = sprintf "up -y -c GIT_SHA=%s" gitSha
+    runTool "pulumi" args path
+
 // *** Define Targets ***
 Target.create "Clean" (fun _ ->
     Trace.log " --- Cleaning stuff --- "
@@ -58,19 +62,21 @@ Target.create "BuildApp" (fun _ ->
 )
 
 Target.create "DockerBuild" (fun _ ->
-    let getDockerTag app =
-        let gitHash = Information.getCurrentHash()
-        sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
+    let gitSha = Information.getCurrentHash()
+    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish" gitSha
 
-    !! "./src/app/**/Dockerfile"
-    |> Seq.map FileInfo
-    |> Seq.iter (fun f -> 
-        let appName = f.Directory.Name.ToLowerInvariant()
-        let dockerTag = getDockerTag appName
-        let dockerFileName = f.FullName
-        let contextPath = f.DirectoryName
-        buildDocker dockerFileName dockerTag  contextPath
-    )
+    // let getDockerTag app =
+    //     sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
+
+    // !! "./src/app/**/Dockerfile"
+    // |> Seq.map FileInfo
+    // |> Seq.iter (fun f -> 
+    //     let appName = f.Directory.Name.ToLowerInvariant()
+    //     let dockerTag = getDockerTag appName
+    //     let dockerFileName = f.FullName
+    //     let contextPath = f.DirectoryName
+    //     buildDocker dockerFileName dockerTag contextPath
+    // )
 )
 
 

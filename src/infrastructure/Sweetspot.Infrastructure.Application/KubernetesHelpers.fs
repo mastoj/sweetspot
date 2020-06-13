@@ -98,7 +98,7 @@ let getStackOutput key (stack: StackReference) =
 
 let getClusterConfig = getStackOutput "kubeconfig"
 let getAcrRegistryName stack = 
-    let fullName = stack |> getStackOutput "registryName"
+    let fullName = stack |> getStackOutput "registryLoginServer"
     fullName.Apply(lastPart "/")
 
 let getK8sProvider clusterConfig =
@@ -116,7 +116,7 @@ let createDeployment (stack: StackReference) (k8sProvider: Provider) (deployment
     let (ImageName imageName) = deploymentConfig.Image
     let acrRegistry = stack |> getAcrRegistryName
     let sha = getSha()
-    let fullImageName = acrRegistry.Apply(fun acr -> sprintf "%s.azurecr.io/%s:%s" acr imageName sha)
+    let fullImageName = acrRegistry.Apply(fun acr -> sprintf "%s/%s:%s" acr imageName sha)
     let (DeploymentName deploymentName) = deploymentConfig.Name
     let (Replicas replicas) = deploymentConfig.Replicas
     let options = deploymentConfig.SetCustomResourceOptions (CustomResourceOptions(Provider = k8sProvider))

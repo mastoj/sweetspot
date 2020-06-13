@@ -72,8 +72,10 @@ module Helpers =
             ))
 
     let createContainerRegistry name (resourceGroup: ResourceGroup) =
-        let options = CustomResourceOptions()
-        options.AdditionalSecretOutputs <- ["AdminPassword"] |> ResizeArray
+        let options =
+            CustomResourceOptions (
+                AdditionalSecretOutputs = (["AdminPassword"] |> ResizeArray)
+            )
 
         Registry(name, 
             RegistryArgs(

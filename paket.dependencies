@@ -14,3 +14,9 @@ nuget Pulumi.FSharp
 nuget Pulumi.Kubernetes
 nuget Pulumi.Random
 nuget Pulumi.Tls
+
+group infrastructure.app
+source https://www.nuget.org/api/v2
+
+nuget Pulumi.FSharp
+nuget Pulumi.Kubernetes

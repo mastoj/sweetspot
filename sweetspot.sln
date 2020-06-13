@@ -17,6 +17,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Sweetspot.Infrastructure.Ap
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Sweetspot.Infrastructure.Core", "src\infrastructure\Sweetspot.Infrastructure.Core\Sweetspot.Infrastructure.Core.fsproj", "{CFFD7B7E-B11C-4D46-9485-37DF6D32C2A9}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Sweetspot.Infrastructure.Publish", "src\infrastructure\Sweetspot.Infrastructure.Publish\Sweetspot.Infrastructure.Publish.fsproj", "{F228C7BC-B008-4498-9F40-068B328627C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,18 @@ Global
 		{CFFD7B7E-B11C-4D46-9485-37DF6D32C2A9}.Release|x64.Build.0 = Release|Any CPU
 		{CFFD7B7E-B11C-4D46-9485-37DF6D32C2A9}.Release|x86.ActiveCfg = Release|Any CPU
 		{CFFD7B7E-B11C-4D46-9485-37DF6D32C2A9}.Release|x86.Build.0 = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|x64.Build.0 = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Debug|x86.Build.0 = Debug|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|x64.ActiveCfg = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|x64.Build.0 = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|x86.ActiveCfg = Release|Any CPU
+		{F228C7BC-B008-4498-9F40-068B328627C6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{64809013-5A30-4124-A71D-0C8BA671FD5D} = {71A5250B-CE23-40EE-B2AF-ED46344BAF1A}
@@ -86,5 +100,6 @@ Global
 		{1677E462-1C92-4570-9FC4-758849DA8FCB} = {71A5250B-CE23-40EE-B2AF-ED46344BAF1A}
 		{AAA74E4D-9A26-4D10-A66F-084AD202C945} = {1677E462-1C92-4570-9FC4-758849DA8FCB}
 		{CFFD7B7E-B11C-4D46-9485-37DF6D32C2A9} = {1677E462-1C92-4570-9FC4-758849DA8FCB}
+		{F228C7BC-B008-4498-9F40-068B328627C6} = {1677E462-1C92-4570-9FC4-758849DA8FCB}
 	EndGlobalSection
 EndGlobal

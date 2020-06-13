@@ -1,0 +1,3 @@
+name: Sweetspot.Infrastructure.Publish
+runtime: dotnet
+description: Publish of sweetspot container images to azure container registry

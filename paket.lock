@@ -475,6 +475,13 @@ NUGET
       Serilog.Sinks.Console (>= 3.1.1) - restriction: >= netcoreapp3.1
       Serilog.Sinks.File (>= 4.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
+    Pulumi.Azure (3.9.1)
+      Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
+      System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
+    Pulumi.Docker (2.2.2)
+      Pulumi (>= 2.3) - restriction: >= netcoreapp3.1
+      semver (>= 2.0.5) - restriction: >= netcoreapp3.1
+      System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
     Pulumi.FSharp (2.4)
       FSharp.Core (>= 4.7.1) - restriction: >= netcoreapp3.1
       Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
@@ -485,6 +492,8 @@ NUGET
     runtime.native.System (4.3.1) - restriction: && (>= netcoreapp3.1) (< netcoreapp5.0)
       Microsoft.NETCore.Platforms (>= 1.1.1)
       Microsoft.NETCore.Targets (>= 1.1.3)
+    semver (2.0.6) - restriction: >= netcoreapp3.1
+      NETStandard.Library (>= 1.6.1) - restriction: && (< net452) (>= netstandard1.1)
     Serilog (2.9) - restriction: >= netcoreapp3.1
     Serilog.Sinks.Console (3.1.1) - restriction: >= netcoreapp3.1
       Serilog (>= 2.5) - restriction: || (>= net45) (>= netstandard1.3)

@@ -1,0 +1,3 @@
+group infrastructure.app
+Pulumi.Azure
+Pulumi.Docker

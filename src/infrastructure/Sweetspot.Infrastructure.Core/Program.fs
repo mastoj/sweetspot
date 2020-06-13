@@ -72,11 +72,16 @@ module Helpers =
             ))
 
     let createContainerRegistry name (resourceGroup: ResourceGroup) =
+        let options = CustomResourceOptions()
+        options.AdditionalSecretOutputs <- ["AdminPassword"] |> ResizeArray
+
         Registry(name, 
             RegistryArgs(
                 Sku = input "basic",
-                ResourceGroupName = io resourceGroup.Name
-            ))
+                ResourceGroupName = io resourceGroup.Name,
+                AdminEnabled = input true
+            ), options = options)
+
 
     let private createAssignment 
                     name 
@@ -209,6 +214,9 @@ let infra () =
         ("kubeconfig", cluster.KubeConfigRaw :> obj)
         ("registryId", containerRegistry.Id :> obj)
         ("registryName", containerRegistry.Name :> obj)
+        ("registryLoginServer", containerRegistry.LoginServer :> obj)
+        ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
+        ("registryAdminPassword", containerRegistry.AdminPassword :> obj)
     ]
 
 [<EntryPoint>]

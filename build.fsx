@@ -39,6 +39,8 @@ let runPulumi path gitSha =
 Target.create "Clean" (fun _ ->
     Trace.log " --- Cleaning stuff --- "
     Shell.cleanDir buildDir
+    !! "./src/**/**/.build"
+    |> Seq.iter Shell.cleanDir
 )
 
 Target.create "BuildApp" (fun _ ->
@@ -54,29 +56,21 @@ Target.create "BuildApp" (fun _ ->
                                 "Optimize", "True"
                                 "DebugSymbols", "True"
                                 "Configuration", buildMode
-//                                "PublishDir", publishDir 
+                                "PublishDir", publishDir 
                             ]
                 }
             }
     DotNet.build setParams "./sweetspot.sln"
 )
 
+Target.create "Deploy" (fun _ ->
+    let gitSha = Information.getCurrentHash()
+    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application" gitSha
+)
+
 Target.create "DockerBuild" (fun _ ->
     let gitSha = Information.getCurrentHash()
     runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish" gitSha
-
-    // let getDockerTag app =
-    //     sprintf "mainacr70d6dafa.azurecr.io/%s:%s" app gitHash
-
-    // !! "./src/app/**/Dockerfile"
-    // |> Seq.map FileInfo
-    // |> Seq.iter (fun f -> 
-    //     let appName = f.Directory.Name.ToLowerInvariant()
-    //     let dockerTag = getDockerTag appName
-    //     let dockerFileName = f.FullName
-    //     let contextPath = f.DirectoryName
-    //     buildDocker dockerFileName dockerTag contextPath
-    // )
 )
 
 

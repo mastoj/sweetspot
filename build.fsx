@@ -63,19 +63,15 @@ Target.create "BuildApp" (fun _ ->
     DotNet.build setParams "./sweetspot.sln"
 )
 
-Target.create "Deploy" (fun _ ->
-    let gitSha = Information.getCurrentHash()
-    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application" gitSha
-)
-
-Target.create "DockerBuild" (fun _ ->
+Target.create "Publish" (fun _ ->
+    Trace.log " --- Publishing app --- "
     let gitSha = Information.getCurrentHash()
     runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish" gitSha
 )
 
-
-Target.create "Publish" (fun _ ->
-    Trace.log " --- Publishing app --- "
+Target.create "Deploy" (fun _ ->
+    let gitSha = Information.getCurrentHash()
+    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application" gitSha
 )
 
 open Fake.Core.TargetOperators

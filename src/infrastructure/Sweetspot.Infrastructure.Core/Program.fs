@@ -11,6 +11,7 @@ open Pulumi.Kubernetes.Yaml
 open Pulumi.Random
 open Pulumi.Tls
 open Pulumi
+open System
 
 [<RequireQualifiedAccess>]
 module Helpers =
@@ -211,6 +212,9 @@ let infra () =
             File = input "manifests/app.yaml"
         )) |> ignore
 
+    let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
+    let adminPassword = containerRegistry.AdminPassword.Apply<string>(makeSecret)
+//        containerRegistry.AdminPassword.Apply<string, Output<string>>(fun (s: string) -> Output.CreateSecret(s))
     // Export the kubeconfig string for the storage account
     dict [
         ("kubeconfig", cluster.KubeConfigRaw :> obj)
@@ -218,7 +222,7 @@ let infra () =
         ("registryName", containerRegistry.Name :> obj)
         ("registryLoginServer", containerRegistry.LoginServer :> obj)
         ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
-        ("registryAdminPassword", containerRegistry.AdminPassword :> obj)
+        ("registryAdminPassword", adminPassword :> obj)
     ]
 
 [<EntryPoint>]

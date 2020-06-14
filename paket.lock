@@ -461,6 +461,9 @@ NUGET
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
     Grpc.Core.Api (2.29) - restriction: >= netcoreapp3.1
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
+    LibGit2Sharp (0.26.2)
+      LibGit2Sharp.NativeBinaries (2.0.306) - restriction: || (>= net46) (>= netstandard2.0)
+    LibGit2Sharp.NativeBinaries (2.0.306) - restriction: || (>= net46) (>= netstandard2.0)
     Microsoft.NETCore.Platforms (3.1.1) - restriction: >= netcoreapp3.1
     Microsoft.NETCore.Targets (3.1) - restriction: >= netcoreapp3.1
     NETStandard.Library (2.0.3) - restriction: >= netcoreapp3.1

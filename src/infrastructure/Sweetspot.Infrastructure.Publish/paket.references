@@ -2,3 +2,4 @@ group infrastructure.app
 Pulumi.Azure
 Pulumi.Docker
 Pulumi.FSharp
+LibGit2Sharp

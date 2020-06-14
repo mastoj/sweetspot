@@ -31,8 +31,8 @@ let buildDocker dockerFile tag contextPath =
     let args = sprintf "build -t %s -f %s %s" tag dockerFile contextPath
     runTool "docker" args __SOURCE_DIRECTORY__
 
-let runPulumi path gitSha =
-    let args = sprintf "up -y -c GIT_SHA=%s" gitSha
+let runPulumi path =
+    let args = sprintf "up -y"
     runTool "pulumi" args path
 
 // *** Define Targets ***
@@ -66,12 +66,12 @@ Target.create "BuildApp" (fun _ ->
 Target.create "Publish" (fun _ ->
     Trace.log " --- Publishing app --- "
     let gitSha = Information.getCurrentHash()
-    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish" gitSha
+    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish"
 )
 
 Target.create "Deploy" (fun _ ->
     let gitSha = Information.getCurrentHash()
-    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application" gitSha
+    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application"
 )
 
 open Fake.Core.TargetOperators

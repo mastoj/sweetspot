@@ -3,6 +3,7 @@
 open Pulumi
 open Pulumi.FSharp
 open Pulumi.Docker
+open LibGit2Sharp
 
 let getCoreStackRef() =
     let env = "dev" // stackParts[stackParts.Length - 1];
@@ -22,8 +23,11 @@ let getImageRegistry stack =
         Username = io adminUserName
     )
 
-let getSha (config: Pulumi.Config) =
-    config.Get("GIT_SHA")
+let getSha() =
+    let repoPath = Repository.Discover(System.Environment.CurrentDirectory)
+    use repo = new Repository(repoPath)
+    let latestCommit = repo.Head.Tip
+    latestCommit.Sha.Substring(0,6)
 
 let lastPart (delimeter: string) (value: string) =
     let parts = value.Split(delimeter)
@@ -34,8 +38,7 @@ let toLower (str: string) = str.ToLower();
 let publishImages (paths: string list) =
     let stack = getCoreStackRef()
     let imageRegistry = stack |> getImageRegistry
-    let config = Pulumi.Config()
-    let sha = getSha config
+    let sha = getSha()
 
     paths
     |> List.map (fun path ->

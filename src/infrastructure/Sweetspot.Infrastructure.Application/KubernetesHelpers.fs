@@ -7,6 +7,7 @@ open Pulumi.Kubernetes.Types.Inputs.Core.V1
 open Pulumi.Kubernetes.Types.Inputs.Apps.V1
 open Pulumi.Kubernetes.Types.Inputs.Meta.V1
 open Pulumi.Kubernetes
+open LibGit2Sharp
 
 [<AutoOpen>]
 module Types =
@@ -109,7 +110,11 @@ let getK8sProvider clusterConfig =
         )
     )
 
-let getSha() = Config().Get("GIT_SHA")
+let getSha() =
+    let repoPath = Repository.Discover(System.Environment.CurrentDirectory)
+    use repo = new Repository(repoPath)
+    let latestCommit = repo.Head.Tip
+    latestCommit.Sha.Substring(0,6)
 
 let createDeployment (stack: StackReference) (k8sProvider: Provider) (deploymentConfig: DeploymentConfig) =
     let inputMapLabels = deploymentConfig.Labels.ToInputMap()

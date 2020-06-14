@@ -65,12 +65,10 @@ Target.create "BuildApp" (fun _ ->
 
 Target.create "Publish" (fun _ ->
     Trace.log " --- Publishing app --- "
-    let gitSha = Information.getCurrentHash()
     runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish"
 )
 
 Target.create "Deploy" (fun _ ->
-    let gitSha = Information.getCurrentHash()
     runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application"
 )
 

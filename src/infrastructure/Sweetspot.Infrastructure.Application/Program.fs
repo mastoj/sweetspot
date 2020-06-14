@@ -6,6 +6,8 @@ open KubernetesHelpers
 open Pulumi.Kubernetes.Core.V1
 
 let infra () =
+    let stack = getCoreStackRef()
+
     let createAppConfig (appName, imageName) =
         createApplicationConfig (ApplicationName appName) (ImageName imageName)
 
@@ -15,7 +17,7 @@ let infra () =
             "sweetspotweb", "sweetspot.web"
         ] 
         |> List.map createAppConfig
-        |> createApplications
+        |> createApplications stack
 
     let getIp (service: Service) =
         service.Status

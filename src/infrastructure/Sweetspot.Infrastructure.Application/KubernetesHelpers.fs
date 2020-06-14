@@ -97,7 +97,7 @@ let getCoreStackRef() =
 let getStackOutput key (stack: StackReference) =
     stack.RequireOutput(input key).Apply(fun v -> v.ToString())
 
-let getClusterConfig = getStackOutput "kubeconfig"
+let getClusterConfig stack = getStackOutput "kubeconfig" stack
 let getAcrRegistryName stack = 
     let fullName = stack |> getStackOutput "registryLoginServer"
     fullName.Apply(lastPart "/")
@@ -213,8 +213,7 @@ let createApplication (stack: StackReference) (k8sProvider: Provider) (applicati
     let service = applicationConfig.ServiceConfig |> createService k8sProvider
     { Deployment = deployment; Service = service }
 
-let createApplications (applicationConfigs: ApplicationConfig list) =
-    let stack = getCoreStackRef()
+let createApplications stack (applicationConfigs: ApplicationConfig list) =
     let k8sprovider =
         stack
         |> getClusterConfig

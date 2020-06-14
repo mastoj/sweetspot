@@ -35,8 +35,7 @@ let lastPart (delimeter: string) (value: string) =
 
 let toLower (str: string) = str.ToLower();
 
-let publishImages (paths: string list) =
-    let stack = getCoreStackRef()
+let publishImages stack (paths: string list) =
     let imageRegistry = stack |> getImageRegistry
     let sha = getSha()
 
@@ -54,11 +53,12 @@ let publishImages (paths: string list) =
         )
 
 let infra () =
+    let stack = getCoreStackRef()
     [
         "../../app/Sweetspot.Web"
         "../../app/Sweetspot.CSharpWorker"
     ]
-    |> publishImages
+    |> publishImages stack
     |> ignore
     dict []
 

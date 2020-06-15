@@ -28,6 +28,7 @@ jobs:
       script: |
         curl -fsSL https://get.pulumi.com | bash
         export PATH=$PATH:$HOME/.pulumi/bin
+        echo "##vso[task.setvariable variable=path]$PATH"
         pulumi login
     env:
       PULUMI_ACCESS_TOKEN: $(pulumi.access.token)

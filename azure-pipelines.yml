@@ -4,20 +4,43 @@
 # https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
-- master
+  - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:  
+- job: BuildAndPublish
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  pool:
+    vmImage: 'ubuntu-latest'
 
-steps:
-- task: Bash@3
-  inputs:
-    targetType: inline
-    script: make build
-  env:
-    PULUMI_TOKEN: xxx
+  variables:
+    solution: '**/*.sln'
+    buildPlatform: 'Any CPU'
+    buildConfiguration: 'Release'
+
+  steps:
+
+    # ADD CACHE
+
+
+  - task: Bash@3
+    inputs:
+      targetType: inline
+      script: make build
+    env:
+      PULUMI_TOKEN: xxx
+
+  - task: Bash@3
+    inputs:
+      targetType: inline
+      script: curl -fsSL https://get.pulumi.com | sh
+
+  - task: Bash@3
+    inputs:
+      targetType: inline
+      script: pulumi stack select dev; make publish
+    env:
+      PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
+      # ARM_CLIENT_SECRET: $(arm.client.secret)
+      # ARM_SUBSCRIPTION_ID: $(arm.subscription.id)
+      # ARM_CLIENT_ID: $(arm.client.id)
+      # ARM_TENANT_ID: $(arm.tenant.id)

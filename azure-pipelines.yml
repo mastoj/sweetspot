@@ -35,7 +35,12 @@ jobs:
   - task: Bash@3
     inputs:
       targetType: inline
-      script: pulumi stack select dev; make publish
+      script: |
+        curl -fsSL https://get.pulumi.com | bash
+        export PATH=$PATH:$HOME/.pulumi/bin
+        pulumi login
+        pulumi stack select dev
+        make publish
     env:
       PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
       # ARM_CLIENT_SECRET: $(arm.client.secret)

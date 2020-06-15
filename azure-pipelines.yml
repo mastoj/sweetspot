@@ -25,8 +25,13 @@ jobs:
   - task: Bash@3
     inputs:
       targetType: inline
-      script: curl -fsSL https://get.pulumi.com | sh
-
+      script: |
+        curl -fsSL https://get.pulumi.com | bash
+        export PATH=$PATH:$HOME/.pulumi/bin
+        pulumi login
+    env:
+      PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
+      
   - task: Bash@3
     inputs:
       targetType: inline

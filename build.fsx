@@ -31,9 +31,12 @@ let buildDocker dockerFile tag contextPath =
     let args = sprintf "build -t %s -f %s %s" tag dockerFile contextPath
     runTool "docker" args __SOURCE_DIRECTORY__
 
-let runPulumi path =
-    let args = sprintf "up -y"
+let runPulumi args path =
     runTool "pulumi" args path
+
+let runPulumiUp = runPulumi (sprintf "up -y")
+
+let runPulumiSelectStack stack = runPulumi (sprintf "stack select %s" stack)
 
 // *** Define Targets ***
 Target.create "Clean" (fun _ ->
@@ -65,11 +68,13 @@ Target.create "BuildApp" (fun _ ->
 
 Target.create "Publish" (fun _ ->
     Trace.log " --- Publishing app --- "
-    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Publish"
+    runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Publish"
+    runPulumiUp "./src/infrastructure/Sweetspot.Infrastructure.Publish"
 )
 
 Target.create "Deploy" (fun _ ->
-    runPulumi "./src/infrastructure/Sweetspot.Infrastructure.Application"
+    runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Publish"
+    runPulumiUp "./src/infrastructure/Sweetspot.Infrastructure.Application"
 )
 
 open Fake.Core.TargetOperators

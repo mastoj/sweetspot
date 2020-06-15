@@ -22,15 +22,15 @@ jobs:
     # ADD CACHE
 
 
-  - task: Bash@3
-    inputs:
-      targetType: inline
-      script: |
-        curl -fsSL https://get.pulumi.com | bash
-        export PATH=$PATH:$HOME/.pulumi/bin
-        pulumi login
-    env:
-      PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
+  # - task: Bash@3
+  #   inputs:
+  #     targetType: inline
+  #     script: |
+  #       curl -fsSL https://get.pulumi.com | bash
+  #       export PATH=$PATH:$HOME/.pulumi/bin
+  #       pulumi login
+  #   env:
+  #     PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
       
   - task: Bash@3
     inputs:
@@ -39,7 +39,6 @@ jobs:
         curl -fsSL https://get.pulumi.com | bash
         export PATH=$PATH:$HOME/.pulumi/bin
         pulumi login
-        pulumi stack select dev
         make publish
     env:
       PULUMI_ACCESS_TOKEN: $(pulumi.access.token)

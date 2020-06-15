@@ -51,6 +51,7 @@ stages:
       runOnce:
         deploy:
           steps:
+          - checkout: self
           - task: Bash@3
             displayName: Setup pulumi
             inputs:

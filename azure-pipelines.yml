@@ -37,13 +37,9 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        pulumi --help
-#        curl -fsSL https://get.pulumi.com | bash
-#        export PATH=$PATH:$HOME/.pulumi/bin
-#        pulumi login
-#        make publish
-    env:
-      PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
+        make publish
+    # env:
+    #   PULUMI_ACCESS_TOKEN: $(pulumi.access.token)
       # ARM_CLIENT_SECRET: $(arm.client.secret)
       # ARM_SUBSCRIPTION_ID: $(arm.subscription.id)
       # ARM_CLIENT_ID: $(arm.client.id)

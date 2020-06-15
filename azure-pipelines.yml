@@ -8,12 +8,10 @@
 
 stages:
 - stage: BuildAndPublish
+  pool:
+    vmImage: 'ubuntu-latest'
   jobs:  
   - job: BuildAndPublish
-
-    pool:
-      vmImage: 'ubuntu-latest'
-
     steps:
     - task: Bash@3
       displayName: Setup pulumi
@@ -40,11 +38,11 @@ stages:
       # ARM_CLIENT_ID: $(arm.client.id)
       # ARM_TENANT_ID: $(arm.tenant.id)
 - stage: DeployDev
+  pool:
+    vmImage: 'ubuntu-latest'
   jobs:
   - deployment: DeployToDev
     displayName: Deploy Dev
-    pool:
-      vmImage: 'Ubuntu-latest'
     # creates an environment if it doesn't exist
     environment: 'sweetspot-dev'
     strategy:

@@ -73,7 +73,8 @@ Target.create "Publish" (fun _ ->
 )
 
 Target.create "Deploy" (fun _ ->
-    runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Publish"
+    Trace.log " --- Depliyng to dev --- "
+    runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Application"
     runPulumiUp "./src/infrastructure/Sweetspot.Infrastructure.Application"
 )
 

@@ -12,6 +12,7 @@ open Pulumi.Random
 open Pulumi.Tls
 open Pulumi
 open System
+open Pulumi.Azure.ServiceBus
 
 [<RequireQualifiedAccess>]
 module Helpers =
@@ -165,6 +166,18 @@ module Helpers =
                 DependsOn = inputList [ input (acrAssignment :> Resource) ; input (networkAssignment :> Resource) ]
             ))
 
+    let createServiceBus (rg: ResourceGroup) (serviceBusNamespaceName: string) =
+        let serviceBus = 
+            Namespace(serviceBusNamespaceName,
+                NamespaceArgs(
+                    Location = io rg.Location,
+                    ResourceGroupName = io rg.Name,
+                    Sku = input "Standard",
+                    Name = input serviceBusNamespaceName
+                )
+            )
+        serviceBus
+
 let infra () =
     let resourceGroupName = "sweetspot-rg"
     let resourceGroup = Helpers.createResourceGroup resourceGroupName
@@ -196,6 +209,8 @@ let infra () =
             kubernetesVersion
             nodeCount
 
+    let serviceBusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
+
     ConfigFile("linkerd",
         ConfigFileArgs(
             File = input "manifests/linkerd.yaml"
@@ -217,12 +232,14 @@ let infra () =
 //        containerRegistry.AdminPassword.Apply<string, Output<string>>(fun (s: string) -> Output.CreateSecret(s))
     // Export the kubeconfig string for the storage account
     dict [
+        ("resourceGroupName", resourceGroup.Name :> obj)
         ("kubeconfig", cluster.KubeConfigRaw :> obj)
         ("registryId", containerRegistry.Id :> obj)
         ("registryName", containerRegistry.Name :> obj)
         ("registryLoginServer", containerRegistry.LoginServer :> obj)
         ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
         ("registryAdminPassword", adminPassword :> obj)
+        ("servicebusNamespace", serviceBusNamespace.Name :> obj)
     ]
 
 [<EntryPoint>]

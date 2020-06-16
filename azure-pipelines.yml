@@ -8,11 +8,18 @@
 
 stages:
 - stage: BuildAndPublish
+  variables:
+    NUGET_PACKAGES: $(Pipeline.Workspace)/packages
   pool:
     vmImage: 'ubuntu-latest'
   jobs:  
   - job: BuildAndPublish
     steps:
+    - task: Cache@2
+      displayName: Cache nuget packages
+      inputs:
+        key: 'paket | paket.lock'
+        path: $(NUGET_PACKAGES)
     - task: Bash@3
       displayName: Setup pulumi
       inputs:

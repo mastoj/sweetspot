@@ -67,6 +67,7 @@ stages:
                 echo "##vso[task.setvariable variable=path]$PATH"
                 pulumi login
                 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+                az login --service-principal -u <app-url> -p <password-or-cert> --tenant <tenant>
             env:
               PULUMI_ACCESS_TOKEN: $(pulumi.access.token)            
           - task: Bash@3

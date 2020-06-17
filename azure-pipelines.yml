@@ -85,8 +85,9 @@ stages:
 - stage: DeployProd
   pool:
     vmImage: 'ubuntu-latest'
-  jobs:
+  jobs:    
   - deployment: DeployToProd
+    timeoutInMinutes: 3
     displayName: Deploy Prod
     # creates an environment if it doesn't exist
     environment: 'sweetspot-prod'

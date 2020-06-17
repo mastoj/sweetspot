@@ -15,12 +15,11 @@ stages:
   jobs:  
   - job: BuildAndPublish
     steps:
-# Using cache is for some reason slower :/
-      # - task: Cache@2
-    #   displayName: Cache nuget packages
-    #   inputs:
-    #     key: 'paket | paket.lock'
-    #     path: $(NUGET_PACKAGES)
+    - task: Cache@2
+      displayName: Cache nuget packages
+      inputs:
+        key: 'paket | paket.lock'
+        path: $(NUGET_PACKAGES)
     - task: Bash@3
       displayName: Setup pulumi
       inputs:
@@ -58,6 +57,11 @@ stages:
         deploy:
           steps:
           - checkout: self
+          - task: Cache@2
+            displayName: Cache nuget packages
+            inputs:
+              key: 'paket | paket.lock'
+              path: $(NUGET_PACKAGES)
           - task: Bash@3
             displayName: Setup pulumi
             inputs:

@@ -9,3 +9,5 @@ paket-files
 .paket
 
 .build/
+.tmp/
+.fake_*/

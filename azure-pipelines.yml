@@ -15,11 +15,11 @@ stages:
   jobs:  
   - job: BuildAndPublish
     steps:
-    - task: Cache@2
-      displayName: Cache nuget packages
-      inputs:
-        key: 'paket | paket.lock'
-        path: $(NUGET_PACKAGES)
+    # - task: Cache@2
+    #   displayName: Cache nuget packages
+    #   inputs:
+    #     key: 'paket | paket.lock'
+    #     path: $(NUGET_PACKAGES)
     - task: Bash@3
       displayName: Setup pulumi
       inputs:
@@ -57,11 +57,11 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - task: Cache@2
-            displayName: Cache nuget packages
-            inputs:
-              key: 'paket | paket.lock'
-              path: $(NUGET_PACKAGES)
+          # - task: Cache@2
+          #   displayName: Cache nuget packages
+          #   inputs:
+          #     key: 'paket | paket.lock'
+          #     path: $(NUGET_PACKAGES)
           - task: Bash@3
             displayName: Setup pulumi
             inputs:
@@ -71,45 +71,36 @@ stages:
                 export PATH=$PATH:$HOME/.pulumi/bin
                 echo "##vso[task.setvariable variable=path]$PATH"
                 pulumi login
+                echo "==> Which AZ?"
+                which az
                 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+                echo "==> Which AZ?"
+                which az
 #                az login --service-principal -u <app-url> -p <password-or-cert> --tenant <tenant>
             env:
               PULUMI_ACCESS_TOKEN: $(pulumi.access.token)            
-          - task: Bash@3
-            displayName: Deploy dev
-            inputs:
-              targetType: inline
-              script: 
-                make deploy
-
-- stage: DeployProd
-  pool:
-    vmImage: 'ubuntu-latest'
-  jobs:    
-  - deployment: DeployToProd
-    timeoutInMinutes: 3
-    displayName: Deploy Prod
-    # creates an environment if it doesn't exist
-    environment: 'sweetspot-prod'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - checkout: self
-          - task: Bash@3
-            displayName: Setup pulumi
-            inputs:
-              targetType: inline
-              script: |
-                curl -fsSL https://get.pulumi.com | bash
-                export PATH=$PATH:$HOME/.pulumi/bin
-                echo "##vso[task.setvariable variable=path]$PATH"
-                pulumi login
-            env:
-              PULUMI_ACCESS_TOKEN: $(pulumi.access.token)            
+          # - task: AzureCLI@2
+          #   displayName: Deploy dev
+          #   inputs:
+          #     azureSubscription: 65b5e624-0000-46fc-8835-a8b35b449321
+          #     scriptType: bash
+          #     scriptLocation: inlineScript
+          #     inlineScript: |
+          #       echo "==> Which AZ?"
+          #       which az
+          #       az account 
+          #       echo "==> This one!"
+          #       echo "==> Which pulumi?!"
+          #       which pulumi
+          #       echo "==> This one"
+          #       make deploy
           - task: Bash@3
             displayName: Deploy dev
             inputs:
               targetType: inline
               script: |
+                echo "==> Which AZ?"
+                which az
+                az account 
+                echo "==> This one!"
                 make deploy

@@ -84,6 +84,7 @@ let createServiceBusTopic (stack: StackReference) topicName =
 let createServiceBusSubscription (stack: StackReference) (topic: Topic) subscriptionName =
     let resourceGroupName = getStackOutput "resourceGroupName" stack
     let serviceBusNamespace = getStackOutput "servicebusNamespace" stack
+    
     Subscription(subscriptionName,
         SubscriptionArgs(
             Name = input subscriptionName,

@@ -1,6 +1,6 @@
 config:
-  azure:clientId: 886ac0c1-0529-4cc2-9e97-5320debc4bcc
+  azure:clientId: 49fb581c-fb83-42ff-9f60-069c340e1b9d
   azure:clientSecret:
-    secure: AAABAMizeBwKc9CrzD74qT/ZEkE6RmxMI1Zs7M9KkT9cA9/XTATpWQFBbOSm/pkRxm3u2+iTNzLT2HLoUh4h4haKU0c=
+    secure: AAABABbfJw+mcGBG5+ARyzVjZGj45wli6JmGGTI/SJUOV9dhiCF2pbDKyfhWAmQhUc7HgEB3Gu004ZBbmZ7objKs+MU=
   azure:subscriptionId: 65b5e624-0000-46fc-8835-a8b35b449321
   azure:tenantId: 053ac3d7-7efe-4c7a-95eb-b97b59e68b82

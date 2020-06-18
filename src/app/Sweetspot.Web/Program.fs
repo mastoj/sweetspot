@@ -93,6 +93,8 @@ let app =
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
+    let sbconnection = System.Environment.GetEnvironmentVariable("SB_CONNECTIONSTRING")
+    printfn "==> Hello conn: %s" sbconnection
     run (app)
     0
 

@@ -42,7 +42,15 @@ let deployApps (stack: StackReference) =
                     ))
 //                ValueFrom
             )
-        appConfig
+        let envVarArgs' = (input envVarArg)::envVariables
+        { 
+            appConfig with
+                DeploymentConfig = {
+                    appConfig.DeploymentConfig with
+                        EnvVariables = envVarArgs'
+                }
+        }
+
 
     let apps = 
         [

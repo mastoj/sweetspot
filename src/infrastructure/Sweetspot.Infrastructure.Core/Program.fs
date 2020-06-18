@@ -178,6 +178,18 @@ module Helpers =
             )
         serviceBus
 
+    let createSharedAccessAuthRule (rg: ResourceGroup) (servicebusNamespace: Namespace) (key: string) =
+        NamespaceAuthorizationRule(
+            key,
+            NamespaceAuthorizationRuleArgs(
+                Listen = input true,
+                Manage = input false,
+                Send = input true,
+                ResourceGroupName = io rg.Name,
+                NamespaceName = io servicebusNamespace.Name
+            )
+        )
+
 let infra () =
     let resourceGroupName = "sweetspot-rg"
     let resourceGroup = Helpers.createResourceGroup resourceGroupName
@@ -210,6 +222,7 @@ let infra () =
             nodeCount
 
     let serviceBusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
+    let sharedAccessAuthRule = Helpers.createSharedAccessAuthRule resourceGroup serviceBusNamespace "ReadListen"
 
     ConfigFile("linkerd",
         ConfigFileArgs(
@@ -229,6 +242,7 @@ let infra () =
 
     let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
     let adminPassword = containerRegistry.AdminPassword.Apply<string>(makeSecret)
+    let sbConnectionstring = sharedAccessAuthRule.PrimaryConnectionString.Apply<string>(makeSecret)
 //        containerRegistry.AdminPassword.Apply<string, Output<string>>(fun (s: string) -> Output.CreateSecret(s))
     // Export the kubeconfig string for the storage account
     dict [
@@ -240,6 +254,7 @@ let infra () =
         ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
         ("registryAdminPassword", adminPassword :> obj)
         ("servicebusNamespace", serviceBusNamespace.Name :> obj)
+        ("sbConnectionstring", sbConnectionstring :> obj)
     ]
 
 [<EntryPoint>]

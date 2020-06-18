@@ -47,7 +47,8 @@ let createServiceBusSubscription (stack: StackReference) (topic: Topic) subscrip
             Name = input subscriptionName,
             ResourceGroupName = io resourceGroupName,
             NamespaceName = io serviceBusNamespace,
-            TopicName = io (topic.Name)
+            TopicName = io (topic.Name),
+            MaxDeliveryCount = input 3
         )
     )
 

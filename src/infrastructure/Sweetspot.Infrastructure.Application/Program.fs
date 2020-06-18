@@ -5,15 +5,49 @@ open Pulumi.FSharp
 open KubernetesHelpers
 open Pulumi.Kubernetes.Core.V1
 open Pulumi.Azure.ServiceBus
+open Pulumi.Kubernetes.Types.Inputs.Core.V1
+
+type ApplicationConfigModifier = ApplicationConfig -> ApplicationConfig
+
+let toBase64 (str: string) =
+    let bytes = System.Text.Encoding.UTF8.GetBytes(str)
+    System.Convert.ToBase64String(bytes)
 
 let deployApps (stack: StackReference) =
-    let createAppConfig (appName, imageName) =
+    
+    let createAppConfig (appName, imageName, modifier) =
         createApplicationConfig (ApplicationName appName) (ImageName imageName)
+        |> modifier
+
+    let sbConnectionString = stack |> getStackOutput "sbConnectionstring"
+    let inputMap = 
+        ["connectionstring", io (sbConnectionString.Apply(fun s -> s |> toBase64))]
+        |> inputMap
+        |> InputMap
+
+    let secret = createSecret stack "servicebus" inputMap
+
+    let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
+        let envVariables = appConfig.DeploymentConfig.EnvVariables
+        let envVarArg =
+            EnvVarArgs(
+                Name = input "SB_CONNECTIONSTRING",
+                ValueFrom = input (
+                    EnvVarSourceArgs(
+                        SecretKeyRef = input (
+                            SecretKeySelectorArgs(
+                                Name = io (secret.Metadata.Apply(fun m -> m.Name)),
+                                Key = input "connectionstring"
+                            ))
+                    ))
+//                ValueFrom
+            )
+        appConfig
 
     let apps = 
         [
-            "sweetspotcsharpworker", "sweetspot.csharpworker"
-            "sweetspotweb", "sweetspot.web"
+            "sweetspotcsharpworker", "sweetspot.csharpworker", (addSecretModifier secret)
+            "sweetspotweb", "sweetspot.web", (addSecretModifier secret)
         ] 
         |> List.map createAppConfig
         |> createApplications stack

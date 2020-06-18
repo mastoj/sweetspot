@@ -89,10 +89,15 @@ let lastPart (delimeter: string) (value: string) =
     let parts = value.Split(delimeter)
     parts.[parts.Length - 1]
 
+let mutable private mutableStackMap = Map.empty
 let getCoreStackRef() =
     let env = "dev" // stackParts[stackParts.Length - 1];
     let stackRef = sprintf "mastoj/Sweetspot.core/%s" env
-    StackReference(stackRef)
+    if Map.containsKey stackRef mutableStackMap |> not
+    then 
+        mutableStackMap <- mutableStackMap |> Map.add stackRef (StackReference(stackRef))
+
+    mutableStackMap.[stackRef]
 
 let getStackOutput key (stack: StackReference) =
     stack.RequireOutput(input key).Apply(fun v -> v.ToString())
@@ -102,13 +107,19 @@ let getAcrRegistryName stack =
     let fullName = stack |> getStackOutput "registryLoginServer"
     fullName.Apply(lastPart "/")
 
+let mutable private k8sProvider = None
 let getK8sProvider clusterConfig =
-    Provider("k8s",
-        ProviderArgs(
-            KubeConfig = io clusterConfig,
-            Namespace = input "app"
+    if k8sProvider.IsNone
+    then
+        k8sProvider <- Some(
+            Provider("k8s",
+                ProviderArgs(
+                    KubeConfig = io clusterConfig,
+                    Namespace = input "app"
+                )
+            )
         )
-    )
+    k8sProvider.Value
 
 let getSha() =
     let repoPath = Repository.Discover(System.Environment.CurrentDirectory)
@@ -212,6 +223,21 @@ let createApplication (stack: StackReference) (k8sProvider: Provider) (applicati
     let deployment = applicationConfig.DeploymentConfig |> createDeployment stack k8sProvider
     let service = applicationConfig.ServiceConfig |> createService k8sProvider
     { Deployment = deployment; Service = service }
+
+let createSecret (stack: StackReference) name (inputMap: InputMap) =
+    let k8sProvider =
+        stack
+        |> getClusterConfig
+        |> getK8sProvider
+    let options = CustomResourceOptions(Provider = k8sProvider)
+
+    Secret(
+        name,
+        SecretArgs(
+            Data = inputMap.ToInputMap()
+        ),
+        options = options
+    )
 
 let createApplications stack (applicationConfigs: ApplicationConfig list) =
     let k8sprovider =

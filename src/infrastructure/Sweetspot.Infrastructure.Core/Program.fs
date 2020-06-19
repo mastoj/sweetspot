@@ -255,6 +255,7 @@ let infra () =
         ("registryAdminPassword", adminPassword :> obj)
         ("servicebusNamespace", serviceBusNamespace.Name :> obj)
         ("sbConnectionstring", sbConnectionstring :> obj)
+        ("location", resourceGroup.Location :> obj)
     ]
 
 [<EntryPoint>]

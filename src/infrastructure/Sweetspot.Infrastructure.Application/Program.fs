@@ -6,12 +6,41 @@ open KubernetesHelpers
 open Pulumi.Kubernetes.Core.V1
 open Pulumi.Azure.ServiceBus
 open Pulumi.Kubernetes.Types.Inputs.Core.V1
+open Pulumi.Azure.CosmosDB
+open Pulumi.Azure.CosmosDB.Inputs
+open System
 
 type ApplicationConfigModifier = ApplicationConfig -> ApplicationConfig
+
+let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
 
 let toBase64 (str: string) =
     let bytes = System.Text.Encoding.UTF8.GetBytes(str)
     System.Convert.ToBase64String(bytes)
+
+let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
+    let envVariables = appConfig.DeploymentConfig.EnvVariables
+    let envVarArg =
+        EnvVarArgs(
+            Name = input "SB_CONNECTIONSTRING",
+            ValueFrom = input (
+                EnvVarSourceArgs(
+                    SecretKeyRef = input (
+                        SecretKeySelectorArgs(
+                            Name = io (secret.Metadata.Apply(fun m -> m.Name)),
+                            Key = input "connectionstring"
+                        ))
+                ))
+        )
+
+    let envVarArgs' = (input envVarArg)::envVariables
+    { 
+        appConfig with
+            DeploymentConfig = {
+                appConfig.DeploymentConfig with
+                    EnvVariables = envVarArgs'
+            }
+    }
 
 let deployApps (stack: StackReference) =
     
@@ -26,31 +55,6 @@ let deployApps (stack: StackReference) =
         |> InputMap
 
     let secret = createSecret stack "servicebus" inputMap
-
-    let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
-        let envVariables = appConfig.DeploymentConfig.EnvVariables
-        let envVarArg =
-            EnvVarArgs(
-                Name = input "SB_CONNECTIONSTRING",
-                ValueFrom = input (
-                    EnvVarSourceArgs(
-                        SecretKeyRef = input (
-                            SecretKeySelectorArgs(
-                                Name = io (secret.Metadata.Apply(fun m -> m.Name)),
-                                Key = input "connectionstring"
-                            ))
-                    ))
-//                ValueFrom
-            )
-        let envVarArgs' = (input envVarArg)::envVariables
-        { 
-            appConfig with
-                DeploymentConfig = {
-                    appConfig.DeploymentConfig with
-                        EnvVariables = envVarArgs'
-                }
-        }
-
 
     let apps = 
         [
@@ -95,16 +99,51 @@ let createServiceBusSubscription (stack: StackReference) (topic: Topic) subscrip
         )
     )
 
+let createCosmosDb stack =
+    let resourceGroupName = getStackOutput "resourceGroupName" stack
+    let location = getStackOutput "location" stack
+    Account("sweetspotdb",
+        AccountArgs(
+            ResourceGroupName = io resourceGroupName,
+            ConsistencyPolicy = input (
+                AccountConsistencyPolicyArgs(
+                    ConsistencyLevel = input "Session",
+                    MaxIntervalInSeconds = input 5,
+                    MaxStalenessPrefix = input 100
+                )),
+            OfferType = input "standard",
+            GeoLocations = inputList [
+                input (
+                    AccountGeoLocationArgs(
+                        Location = io location,
+                        FailoverPriority = input 0
+                    )
+                )
+            ]
+        )
+    )
 
-let infra () =
-    let stack = getCoreStackRef()
-    let appsOutput = deployApps stack
+let deployAppInfrastructure (stack: StackReference) =
     let topic = createServiceBusTopic stack "sweetspot-dev-web-topic"
     let subscription = createServiceBusSubscription stack topic "sweetspot-dev-web-topic-worker-sub"
+    let cosmosDb = createCosmosDb stack
+
     [
         "topic", topic.Name :> obj
         "subscription", subscription.Name :> obj
-    ] @ appsOutput
+        "dbMasterKey", (cosmosDb.PrimaryMasterKey.Apply<string>(makeSecret)) :> obj
+        "dbEndpoint", cosmosDb.Endpoint :> obj
+    ]
+
+let infra () =
+    let stack = getCoreStackRef()
+    let infrastructureOutput = deployAppInfrastructure stack
+    let appsOutput = deployApps stack
+    [
+        infrastructureOutput
+        appsOutput
+    ]
+    |> List.concat
     |> dict
 
 

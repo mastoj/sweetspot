@@ -243,11 +243,12 @@ let infra () =
     let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
     let adminPassword = containerRegistry.AdminPassword.Apply<string>(makeSecret)
     let sbConnectionstring = sharedAccessAuthRule.PrimaryConnectionString.Apply<string>(makeSecret)
+    let kubeconfigSecret = cluster.KubeConfigRaw.Apply<string>(makeSecret)
 //        containerRegistry.AdminPassword.Apply<string, Output<string>>(fun (s: string) -> Output.CreateSecret(s))
     // Export the kubeconfig string for the storage account     
     dict [
         ("resourceGroupName", resourceGroup.Name :> obj)
-        ("kubeconfig", cluster.KubeConfigRaw :> obj)
+        ("kubeconfig", kubeconfigSecret :> obj)
         ("registryId", containerRegistry.Id :> obj)
         ("registryName", containerRegistry.Name :> obj)
         ("registryLoginServer", containerRegistry.LoginServer :> obj)

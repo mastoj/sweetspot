@@ -1,4 +1,4 @@
-﻿module Program
+module Program
 
 open Pulumi
 open Pulumi.FSharp
@@ -99,10 +99,10 @@ let createServiceBusSubscription (stack: StackReference) (topic: Topic) subscrip
         )
     )
 
-let createCosmosDb stack =
+let createCosmosDb stack (config: AccountArgs -> AccountArgs) =
     let resourceGroupName = getStackOutput "resourceGroupName" stack
     let location = getStackOutput "location" stack
-    Account("sweetspotdb",
+    let args = 
         AccountArgs(
             ResourceGroupName = io resourceGroupName,
             ConsistencyPolicy = input (
@@ -121,12 +121,15 @@ let createCosmosDb stack =
                 )
             ]
         )
+        |> config
+    Account("sweetspotdb",
+        args
     )
 
 let deployAppInfrastructure (stack: StackReference) =
     let topic = createServiceBusTopic stack "sweetspot-dev-web-topic"
     let subscription = createServiceBusSubscription stack topic "sweetspot-dev-web-topic-worker-sub"
-    let cosmosDb = createCosmosDb stack
+    let cosmosDb = createCosmosDb stack id
 
     [
         "topic", topic.Name :> obj

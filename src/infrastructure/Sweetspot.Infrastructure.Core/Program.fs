@@ -1,4 +1,4 @@
-﻿module Program
+module Program
 
 open Pulumi.AzureAD
 open Pulumi.Azure.Core

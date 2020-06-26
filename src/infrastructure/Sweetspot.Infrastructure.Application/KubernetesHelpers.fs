@@ -261,26 +261,31 @@ let toBase64 (str: string) =
     let bytes = System.Text.Encoding.UTF8.GetBytes(str)
     System.Convert.ToBase64String(bytes)
 
-let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
-    let envVariables = appConfig.DeploymentConfig.EnvVariables
-    let envVarArg =
-        EnvVarArgs(
-            Name = input "SB_CONNECTIONSTRING",
-            ValueFrom = input (
-                EnvVarSourceArgs(
-                    SecretKeyRef = input (
-                        SecretKeySelectorArgs(
-                            Name = io (secret.Metadata.Apply(fun m -> m.Name)),
-                            Key = input "connectionstring"
-                        ))
-                ))
-        )
+let envVariablesModifier envVariables (appConfig: ApplicationConfig) =
+    let current = appConfig.DeploymentConfig.EnvVariables
+    let newEnvVar = envVariables @ current
 
-    let envVarArgs' = (input envVarArg)::envVariables
     { 
         appConfig with
             DeploymentConfig = {
                 appConfig.DeploymentConfig with
-                    EnvVariables = envVarArgs'
+                    EnvVariables = newEnvVar
             }
     }
+
+let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
+    let envVarArg =
+        input (
+            EnvVarArgs(
+                Name = input "SB_CONNECTIONSTRING",
+                ValueFrom = input (
+                    EnvVarSourceArgs(
+                        SecretKeyRef = input (
+                            SecretKeySelectorArgs(
+                                Name = io (secret.Metadata.Apply(fun m -> m.Name)),
+                                Key = input "connectionstring"
+                            ))
+                    ))
+            )
+        )
+    envVariablesModifier [envVarArg] appConfig

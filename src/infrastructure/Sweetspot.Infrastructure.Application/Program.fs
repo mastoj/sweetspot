@@ -30,41 +30,27 @@ let deployApps (stack: StackReference) =
         ("sweetspotcsharpworker", "sweetspot.csharpworker", (addSecretModifier secret))
         |> createAppConfig
 
-    let worker = createApplications stack [workerConfig] |> List.head |> snd
-    let serivceName = worker.Service.Metadata.Apply(fun m -> m.Name)
+    let worker = createApplications stack [workerConfig]
+    let serviceName = worker |> List.head |> snd |> (fun w -> w.Service.Metadata.Apply(fun m -> m.Name))
     let envVariables = [
         input (EnvVarArgs(
           Name = input "service__csharpworker__host", 
-          Value = io (serivceName)))
+          Value = io (serviceName)))
         input (EnvVarArgs(
           Name = input "service__csharpworker__port", 
           Value = input "80"))
     ]
     let webConfig =
-        ("sweetspotweb", "sweetspot.web", (addSecretModifier secret))
+        ("sweetspotweb", "sweetspot.web", ((addSecretModifier secret) >> (envVariablesModifier envVariables) ))
         |> createAppConfig
-    let webConfig' = 
-        {
-            webConfig with 
-                DeploymentConfig =
-                    {
-                        webConfig.DeploymentConfig with EnvVariables = envVariables
-                    }
-        }
-    let web = [webConfig'] |> createApplications stack
-    let apps = 
-        [
-            
-            "sweetspotweb", "sweetspot.web", (addSecretModifier secret)
-        ] 
-        |> List.map createAppConfig
-        |> createApplications stack
+    let web = [webConfig] |> createApplications stack
 
     let getIp (service: Service) =
         service.Status
         |> Outputs.apply(fun status -> status.LoadBalancer.Ingress.[0].Ip)
 
-    apps
+    [worker; web]
+    |> List.concat
     |> List.map (
         fun (appName, app) ->
             appName, (getIp app.Service :> obj)

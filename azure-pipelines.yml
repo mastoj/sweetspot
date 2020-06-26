@@ -62,4 +62,5 @@ stages:
             inputs:
               targetType: inline
               script: |
-                make deploy
+                make deploy-root
+#                make deploy

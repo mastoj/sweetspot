@@ -21,3 +21,7 @@ deploy: restore-tool ## Deploys the apps
 
 deploy-core-infra: ## Deploys the core infrastructure
 	pulumi up -y -C src/infrastructure/Sweetspot.Infrastructure.Core
+
+deploy-root: restore-tool ## Deploys the apps
+	pulumi stack select dev
+	pulumi up -y -C Sweetspot.Infrastructure.Application

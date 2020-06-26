@@ -17,7 +17,7 @@ stages:
     steps:
     - task: Bash@3
       displayName: Setup pulumi
-      inputs:
+      inputsgi:
         targetType: inline
         script: |
           curl -fsSL https://get.pulumi.com | bash

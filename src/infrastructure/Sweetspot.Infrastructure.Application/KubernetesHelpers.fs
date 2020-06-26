@@ -8,6 +8,7 @@ open Pulumi.Kubernetes.Types.Inputs.Apps.V1
 open Pulumi.Kubernetes.Types.Inputs.Meta.V1
 open Pulumi.Kubernetes
 open LibGit2Sharp
+open System
 
 [<AutoOpen>]
 module Types =
@@ -251,3 +252,35 @@ let createApplications stack (applicationConfigs: ApplicationConfig list) =
             let (DeploymentName deployName) = config.DeploymentConfig.Name
             deployName, createApplication stack k8sprovider config
         )
+
+type ApplicationConfigModifier = ApplicationConfig -> ApplicationConfig
+
+let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
+
+let toBase64 (str: string) =
+    let bytes = System.Text.Encoding.UTF8.GetBytes(str)
+    System.Convert.ToBase64String(bytes)
+
+let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
+    let envVariables = appConfig.DeploymentConfig.EnvVariables
+    let envVarArg =
+        EnvVarArgs(
+            Name = input "SB_CONNECTIONSTRING",
+            ValueFrom = input (
+                EnvVarSourceArgs(
+                    SecretKeyRef = input (
+                        SecretKeySelectorArgs(
+                            Name = io (secret.Metadata.Apply(fun m -> m.Name)),
+                            Key = input "connectionstring"
+                        ))
+                ))
+        )
+
+    let envVarArgs' = (input envVarArg)::envVariables
+    { 
+        appConfig with
+            DeploymentConfig = {
+                appConfig.DeploymentConfig with
+                    EnvVariables = envVarArgs'
+            }
+    }

@@ -140,11 +140,11 @@ let deployAppInfrastructure (stack: StackReference) =
 
 let infra () =
     let stack = getCoreStackRef()
-    let infrastructureOutput = deployAppInfrastructure stack
-    let appsOutput = deployApps stack
+    // let infrastructureOutput = deployAppInfrastructure stack
+    // let appsOutput = deployApps stack
     [
-        infrastructureOutput
-        appsOutput
+        // infrastructureOutput
+        // appsOutput
     ]
     |> List.concat
     |> dict

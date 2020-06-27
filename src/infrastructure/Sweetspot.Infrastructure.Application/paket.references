@@ -1,3 +1,5 @@
 group infrastructure.app
-Pulumi.Azure
 Pulumi.FSharp
+Pulumi.Kubernetes
+LibGit2Sharp
+Pulumi.Azure

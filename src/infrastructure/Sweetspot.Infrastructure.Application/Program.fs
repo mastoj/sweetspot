@@ -33,12 +33,12 @@ let deployApps (stack: StackReference) =
     let worker = createApplications stack [workerConfig]
     let serviceName = worker |> List.head |> snd |> (fun w -> w.Service.Metadata.Apply(fun m -> m.Name))
     let envVariables = [
-        input (EnvVarArgs(
-          Name = input "service__csharpworker__host", 
-          Value = io (serviceName)))
-        input (EnvVarArgs(
-          Name = input "service__csharpworker__port", 
-          Value = input "80"))
+        // input (EnvVarArgs(
+        //   Name = input "service__csharpworker__host", 
+        //   Value = io (serviceName)))
+        // input (EnvVarArgs(
+        //   Name = input "service__csharpworker__port", 
+        //   Value = input "80"))
     ]
     let webConfig =
         ("sweetspotweb", "sweetspot.web", ((addSecretModifier secret) >> (envVariablesModifier envVariables) ))

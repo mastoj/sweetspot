@@ -1,4 +1,4 @@
-module Program
+﻿module Program
 
 open Pulumi
 open Pulumi.FSharp

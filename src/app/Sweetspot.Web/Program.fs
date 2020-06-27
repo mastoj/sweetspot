@@ -54,8 +54,9 @@ let messagesHandler next (ctx: HttpContext) =
     }
 
 open Microsoft.Extensions.Configuration
-let getServiceUri (ctx: HttpContext) (tyeName: string) (serviceName: string) =
-    let baseUri = TyeConfigurationExtensions.GetServiceUri(ctx.GetService<IConfiguration>(), "sweetspot.csharpworker", null)
+open Microsoft.Extensions.DependencyInjection
+let getServiceUri (sp: IServiceProvider) (tyeName: string) (serviceName: string) =
+    let baseUri = TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "sweetspot.csharpworker", null)
     if baseUri |> isNull
     then
         let url = sprintf "http://%s" serviceName
@@ -65,8 +66,6 @@ let getServiceUri (ctx: HttpContext) (tyeName: string) (serviceName: string) =
 
 let helloHandler next (ctx: HttpContext) =
     let weatherClient: WeatherClient = ctx.GetService<WeatherClient>()
-    let baseUri = getServiceUri ctx "sweetspot.csharpworker" "sweetspotcsharpworker"
-    printfn "==> Wat: %A" baseUri
     task {
         let! response = weatherClient.GetWeather()
         let response = { Wat = (sprintf "Hello again wat: %A" response) }
@@ -81,14 +80,13 @@ let webRoutes = router {
     get "/" helloHandler
 }
 
-open Microsoft.Extensions.DependencyInjection
 let app =
 
     let configureServices (services: IServiceCollection) =
         
         services.AddScoped<WeatherClient>(fun sp -> 
-            let configuration = sp.GetService<IConfiguration>()
-            let baseUri = TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "csharpworker", null)
+            let baseUri = getServiceUri sp "sweetspot.csharpworker" "sweetspotcsharpworker"
+            printfn "==> Wat: %A" baseUri
             printfn "==> Uri from tye: %A" baseUri
             WeatherClient.client baseUri)
 

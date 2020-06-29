@@ -13,10 +13,10 @@ open System
 
 
 let deployApps (stack: StackReference) =
-    
-    let createAppConfig (appName, imageName, modifier) =
-        createApplicationConfig (ApplicationName appName) (ImageName imageName)
-        |> modifier
+    let k8sCluster =
+        stack
+        |> getClusterConfig "kubeconfig"
+        |> getK8sProvider "k8s" "app"
 
     let sbConnectionString = stack |> getStackOutput "sbConnectionstring"
     let inputMap = 
@@ -24,36 +24,30 @@ let deployApps (stack: StackReference) =
         |> inputMap
         |> InputMap
 
-    let secret = createSecret stack "servicebus" inputMap
+    let secret = createSecret k8sCluster "servicebus" inputMap
+    let addSbConnectionString = addSecret "SB_CONNECTIONSTRING" "connectionstring" secret
 
-    let workerConfig =
-        ("sweetspotcsharpworker", "sweetspot.csharpworker", (addSecretModifier secret))
-        |> createAppConfig
+    let workerName = "sweetspotcsharpworker"
+    let worker =
+        createApplicationConfig (ApplicationName workerName) (ImageName "sweetspot.csharpworker")
+        |> addSbConnectionString
+        |> createApplication stack k8sCluster
 
-    let worker = createApplications stack [workerConfig]
-    let serviceName = worker |> List.head |> snd |> (fun w -> w.Service.Metadata.Apply(fun m -> m.Name))
-    let envVariables = [
-        // input (EnvVarArgs(
-        //   Name = input "service__csharpworker__host", 
-        //   Value = io (serviceName)))
-        // input (EnvVarArgs(
-        //   Name = input "service__csharpworker__port", 
-        //   Value = input "80"))
+    let webName = "sweetspotweb"
+    let web =
+        createApplicationConfig (ApplicationName webName) (ImageName "sweetspot.web")
+        |> addSbConnectionString
+        |> withLoadbalancer
+        |> createApplication stack k8sCluster
+
+    let apps = [
+        (workerName, worker)
+        (webName, web)
     ]
-    let webConfig =
-        ("sweetspotweb", "sweetspot.web", ((addSecretModifier secret) >> (envVariablesModifier envVariables) ))
-        |> createAppConfig
-    let web = [webConfig] |> createApplications stack
-
-    let getIp (service: Service) =
-        service.Status
-        |> Outputs.apply(fun status -> status.LoadBalancer.Ingress.[0].Ip)
-
-    [worker; web]
-    |> List.concat
+    apps
     |> List.map (
         fun (appName, app) ->
-            appName, (getIp app.Service :> obj)
+            appName, (getServiceIp app.Service :> obj)
         ) 
 
 let deployAppInfrastructure (stack: StackReference) =
@@ -69,7 +63,10 @@ let deployAppInfrastructure (stack: StackReference) =
     ]
 
 let infra () =
-    let stack = getCoreStackRef()
+    let env = "dev"
+    let coreStacKName = sprintf "mastoj/Sweetspot.core/%s" env
+
+    let stack = getStackRef coreStacKName
     let infrastructureOutput = deployAppInfrastructure stack
     let appsOutput = deployApps stack
     [

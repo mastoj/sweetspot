@@ -9,6 +9,7 @@ open Pulumi.Kubernetes.Types.Inputs.Meta.V1
 open Pulumi.Kubernetes
 open LibGit2Sharp
 open System
+open Pulumi.FSharp
 
 [<AutoOpen>]
 module Types =
@@ -27,18 +28,84 @@ module Types =
 
     type ServiceType =
         | LoadBalancer
+        | NodePort
+        | ClusterIP
+        | ExternalName of string
         with
-            override this.ToString() =
+            member this.TypeString() =
                 match this with
                 | LoadBalancer -> "LoadBalancer"
+                | NodePort -> "NodePort"
+                | ClusterIP -> "ClusterIP"
+                | ExternalName _ -> "ExternalName"
+            member this.Apply (serviceArgs: ServiceArgs) =
+                match this with
+                | ExternalName name ->
+                    serviceArgs.Spec <- io (
+                        serviceArgs.Spec.Apply(
+                            fun spec ->
+                                spec.Type <- input (this.TypeString())
+                                spec.ExternalName <- input name
+                                spec))
+                | _ ->
+                    serviceArgs.Spec <- io (
+                        serviceArgs.Spec.Apply(
+                            fun spec ->
+                                spec.Type <- input (this.TypeString())
+                                spec))
+                serviceArgs
+    
+    type TransportProtocol =
+        | UDP
+        | TCP
+        with member this.ProtocolString() =
+            match this with
+            | UDP -> "UDP"
+            | TCP -> "TCP"
+    
+    type ServicePort = 
+        {
+            Port: int
+            TargetPort: int
+            Protocol: TransportProtocol
+        }
+        with
+            member this.Apply(serviceArgs: ServiceArgs) =
+                let specArgs = serviceArgs.Spec.Apply(fun spec ->
+                    spec.Ports.Add(
+                        input (
+                            ServicePortArgs(
+                                Port = input this.Port,
+                                TargetPort = inputUnion1Of2 this.TargetPort,
+                                Protocol = input (this.Protocol.ProtocolString())
+                            )
+                        )
+                    )
+                    spec
+                )
+                serviceArgs.Spec <- io specArgs
+                serviceArgs
    
     type SetCustomResourceOptions =  (CustomResourceOptions -> CustomResourceOptions)
 
     type ServiceName = ServiceName of string
+    type AppSelector = AppSelector of InputMap
+        with 
+            member this.Apply(serviceArgs: ServiceArgs) =
+                let (AppSelector im) = this
+                let specArgs = 
+                    serviceArgs.Spec.Apply(fun spec ->
+                        spec.Selector <- (im.ToInputMap())
+                        spec
+                    )
+                serviceArgs.Spec <- io specArgs
+                serviceArgs
+
     type ServiceConfig = {
         Name: ServiceName
-        Selector: InputMap
+        Selector: AppSelector
         ServiceType: ServiceType
+        ServicePort: ServicePort
         SetCustomResourceOptions: SetCustomResourceOptions
         CustomOptions: Map<string, obj>
     }
@@ -46,8 +113,9 @@ module Types =
         static member InitConfig serviceName =
             {
                 Name = serviceName
-                Selector = (InputMap.List [])
-                ServiceType = LoadBalancer
+                Selector = (AppSelector (InputMap.List []))
+                ServiceType = NodePort
+                ServicePort = { Port = 80; TargetPort = 80; Protocol = TCP }
                 SetCustomResourceOptions = id
                 CustomOptions = Map.empty
             }
@@ -91,32 +159,30 @@ let lastPart (delimeter: string) (value: string) =
     parts.[parts.Length - 1]
 
 let mutable private mutableStackMap = Map.empty
-let getCoreStackRef() =
-    let env = "dev" // stackParts[stackParts.Length - 1];
-    let stackRef = sprintf "mastoj/Sweetspot.core/%s" env
-    if Map.containsKey stackRef mutableStackMap |> not
+let getStackRef stackName =
+    if Map.containsKey stackName mutableStackMap |> not
     then 
-        mutableStackMap <- mutableStackMap |> Map.add stackRef (StackReference(stackRef))
+        mutableStackMap <- mutableStackMap |> Map.add stackName (StackReference(stackName))
 
-    mutableStackMap.[stackRef]
+    mutableStackMap.[stackName]
 
 let getStackOutput key (stack: StackReference) =
     stack.RequireOutput(input key).Apply(fun v -> v.ToString())
 
-let getClusterConfig stack = getStackOutput "kubeconfig" stack
+let getClusterConfig configName stack = getStackOutput configName stack
 let getAcrRegistryName stack = 
     let fullName = stack |> getStackOutput "registryLoginServer"
     fullName.Apply(lastPart "/")
 
 let mutable private k8sProvider = None
-let getK8sProvider clusterConfig =
+let getK8sProvider providerName namespaceName clusterConfig =
     if k8sProvider.IsNone
     then
         k8sProvider <- Some(
-            Provider("k8s",
+            Provider(providerName,
                 ProviderArgs(
                     KubeConfig = io clusterConfig,
-                    Namespace = input "app"
+                    Namespace = input namespaceName
                 )
             )
         )
@@ -175,32 +241,21 @@ let createDeployment (stack: StackReference) (k8sProvider: Provider) (deployment
         ), options = options)
 
 let createService (k8sProvider: Provider) (serviceConfig: ServiceConfig) =
-    let selectorInput = serviceConfig.Selector.ToInputMap()
-    let targetPort: InputUnion<int, string> = InputUnion.op_Implicit(80)
     let (ServiceName serviceName) = serviceConfig.Name
     let options = serviceConfig.SetCustomResourceOptions (CustomResourceOptions(Provider = k8sProvider))
 
-    Service(serviceName,
+    let serviceArgs =
         ServiceArgs(
             Metadata = input (
                 ObjectMetaArgs(
                     Name = input serviceName
                 )
-            ),
-            Spec = input (
-                ServiceSpecArgs(
-                    Type = input (serviceConfig.ServiceType.ToString()),
-                    Selector = selectorInput,
-                    Ports = inputList [
-                        input (ServicePortArgs(
-                            Port = input 80,
-                            TargetPort = targetPort,
-                            Protocol = input "TCP"
-                        ))
-                    ])
-                )),
-            options = options
-    )
+            ))
+        |> serviceConfig.ServiceType.Apply
+        |> serviceConfig.ServicePort.Apply
+        |> serviceConfig.Selector.Apply
+
+    Service(serviceName, serviceArgs, options = options)
 
 let createApplicationConfig (ApplicationName applicationName) imageName =
     let deploymentLabels = [ "app", applicationName ]
@@ -213,7 +268,7 @@ let createApplicationConfig (ApplicationName applicationName) imageName =
     let serviceConfig = {
         ServiceConfig.InitConfig
             (ServiceName applicationName)
-            with Selector = (InputMap.List deploymentLabels)
+            with Selector = AppSelector (InputMap.List deploymentLabels)
     }
     {
         DeploymentConfig = deploymentConfig
@@ -225,11 +280,7 @@ let createApplication (stack: StackReference) (k8sProvider: Provider) (applicati
     let service = applicationConfig.ServiceConfig |> createService k8sProvider
     { Deployment = deployment; Service = service }
 
-let createSecret (stack: StackReference) name (inputMap: InputMap) =
-    let k8sProvider =
-        stack
-        |> getClusterConfig
-        |> getK8sProvider
+let createSecret (k8sProvider: Provider) name (inputMap: InputMap) =
     let options = CustomResourceOptions(Provider = k8sProvider)
 
     Secret(
@@ -240,20 +291,9 @@ let createSecret (stack: StackReference) name (inputMap: InputMap) =
         options = options
     )
 
-let createApplications stack (applicationConfigs: ApplicationConfig list) =
-    let k8sprovider =
-        stack
-        |> getClusterConfig
-        |> getK8sProvider
-
-    applicationConfigs
-    |> List.map (
-        fun config ->
-            let (DeploymentName deployName) = config.DeploymentConfig.Name
-            deployName, createApplication stack k8sprovider config
-        )
-
-type ApplicationConfigModifier = ApplicationConfig -> ApplicationConfig
+let getServiceIp (service: Service) =
+    service.Status
+    |> Outputs.apply(fun status -> status.LoadBalancer.Ingress.[0].Ip)
 
 let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
 
@@ -261,31 +301,41 @@ let toBase64 (str: string) =
     let bytes = System.Text.Encoding.UTF8.GetBytes(str)
     System.Convert.ToBase64String(bytes)
 
-let envVariablesModifier envVariables (appConfig: ApplicationConfig) =
-    let current = appConfig.DeploymentConfig.EnvVariables
-    let newEnvVar = envVariables @ current
-
-    { 
+let addEnvVariable envVariable (appConfig: ApplicationConfig) =
+    {
         appConfig with
             DeploymentConfig = {
                 appConfig.DeploymentConfig with
-                    EnvVariables = newEnvVar
+                    EnvVariables = envVariable :: appConfig.DeploymentConfig.EnvVariables
             }
     }
 
-let addSecretModifier (secret: Secret) (appConfig: ApplicationConfig) =
+let addEnvVariables envVariables (appConfig: ApplicationConfig) =
+    envVariables
+    |> List.fold (fun ac ev -> addEnvVariable ev ac) appConfig
+
+let addSecret name key (secret: Secret) (appConfig: ApplicationConfig) =
     let envVarArg =
         input (
             EnvVarArgs(
-                Name = input "SB_CONNECTIONSTRING",
+                Name = input name,
                 ValueFrom = input (
                     EnvVarSourceArgs(
                         SecretKeyRef = input (
                             SecretKeySelectorArgs(
                                 Name = io (secret.Metadata.Apply(fun m -> m.Name)),
-                                Key = input "connectionstring"
+                                Key = input key
                             ))
                     ))
             )
         )
-    envVariablesModifier [envVarArg] appConfig
+    addEnvVariable envVarArg appConfig
+
+let withLoadbalancer (appConfig: ApplicationConfig) =
+    {
+        appConfig with
+            ServiceConfig = {
+                appConfig.ServiceConfig with
+                    ServiceType = LoadBalancer
+            }
+    }

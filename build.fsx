@@ -66,7 +66,7 @@ Target.create "BuildApp" (fun _ ->
     DotNet.build setParams "./sweetspot.sln"
 )
 
-Target.create "Publish" (fun _ ->
+Target.create "PublishDocker" (fun _ ->
     Trace.log " --- Publishing app --- "
     runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Publish"
     runPulumiUp "./src/infrastructure/Sweetspot.Infrastructure.Publish"
@@ -83,7 +83,7 @@ open Fake.Core.TargetOperators
 // *** Define Dependencies ***
 "Clean"
     ==> "BuildApp"
-    ==> "Publish"
+    ==> "PublishDocker"
 
 // *** Start Build ***
-Target.runOrDefault "Publish"
+Target.runOrDefault "PublishDocker"

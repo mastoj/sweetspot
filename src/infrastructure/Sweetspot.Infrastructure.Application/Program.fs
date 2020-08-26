@@ -13,6 +13,7 @@ open System
 
 
 let deployApps (stack: StackReference) =
+
     let k8sCluster =
         stack
         |> getClusterConfig "kubeconfig"

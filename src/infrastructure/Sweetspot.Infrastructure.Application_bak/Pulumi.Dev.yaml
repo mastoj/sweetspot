@@ -1,7 +1,0 @@
-config:
-  azure:clientId: b36f56e7-2174-4a0d-befd-aa027ba990cd
-  azure:clientSecret:
-    secure: AAABAIXuZTV065I+d1bGzo/2+zqN//kp++p7qNllzlvD7QI8SdYxBf2VnEEKDwGbtbZBrErPwmqjvvCZ/qdEN0Rw
-  azure:location: westeurope
-  azure:subscriptionId: 65b5e624-0000-46fc-8835-a8b35b449321
-  azure:tenantId: 053ac3d7-7efe-4c7a-95eb-b97b59e68b82

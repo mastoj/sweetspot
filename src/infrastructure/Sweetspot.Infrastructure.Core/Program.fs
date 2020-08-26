@@ -13,9 +13,13 @@ open Pulumi.Tls
 open Pulumi
 open System
 open Pulumi.Azure.ServiceBus
+open Pulumi.Azure.Storage.Inputs
 
 [<RequireQualifiedAccess>]
 module Helpers =
+    let x = AccountNetworkRulesArgs()
+    let y = Pulumi.Kubernetes.AdmissionRegistration.V1.MutatingWebhookConfiguration("")
+
     let createResourceGroup name = 
         ResourceGroup(name, 
             ResourceGroupArgs(

@@ -12,49 +12,50 @@ NUGET
       Newtonsoft.Json (>= 12.0.2)
       TaskBuilder.fs (>= 2.1)
       Utf8Json (>= 1.3.7)
-    Google.Protobuf (3.12.3) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Google.Protobuf (3.13) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       System.Memory (>= 4.5.2)
-    Grpc (2.30) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Grpc.Core (>= 2.30)
-    Grpc.Core (2.30) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Grpc.Core.Api (>= 2.30)
+      System.Runtime.CompilerServices.Unsafe (>= 4.5.2)
+    Grpc (2.31) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Grpc.Core (>= 2.31)
+    Grpc.Core (2.31) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Grpc.Core.Api (>= 2.31)
       System.Memory (>= 4.5.3)
-    Grpc.Core.Api (2.30) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Grpc.Core.Api (2.31) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       System.Memory (>= 4.5.3)
-    Microsoft.AspNetCore.Authentication.JwtBearer (3.1.5) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Microsoft.AspNetCore.Authentication.JwtBearer (3.1.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.IdentityModel.Protocols.OpenIdConnect (>= 5.5) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
     Microsoft.CSharp (4.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-    Microsoft.Extensions.Configuration (3.1.5)
-      Microsoft.Extensions.Configuration.Abstractions (>= 3.1.5)
-    Microsoft.Extensions.Configuration.Abstractions (3.1.5)
-      Microsoft.Extensions.Primitives (>= 3.1.5)
-    Microsoft.Extensions.Primitives (3.1.5)
+    Microsoft.Extensions.Configuration (3.1.7)
+      Microsoft.Extensions.Configuration.Abstractions (>= 3.1.7)
+    Microsoft.Extensions.Configuration.Abstractions (3.1.7)
+      Microsoft.Extensions.Primitives (>= 3.1.7)
+    Microsoft.Extensions.Primitives (3.1.7)
       System.Memory (>= 4.5.2) - restriction: || (== netstandard2.0) (== netstandard2.1)
       System.Runtime.CompilerServices.Unsafe (>= 4.7.1) - restriction: || (== netstandard2.0) (== netstandard2.1)
-    Microsoft.IdentityModel.JsonWebTokens (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Microsoft.IdentityModel.Tokens (>= 6.7)
-    Microsoft.IdentityModel.Logging (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-    Microsoft.IdentityModel.Protocols (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Microsoft.IdentityModel.Logging (>= 6.7)
-      Microsoft.IdentityModel.Tokens (>= 6.7)
-    Microsoft.IdentityModel.Protocols.OpenIdConnect (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Microsoft.IdentityModel.Protocols (>= 6.7)
-      System.IdentityModel.Tokens.Jwt (>= 6.7)
-    Microsoft.IdentityModel.Tokens (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Microsoft.IdentityModel.JsonWebTokens (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Microsoft.IdentityModel.Tokens (>= 6.7.1)
+    Microsoft.IdentityModel.Logging (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Microsoft.IdentityModel.Protocols (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Microsoft.IdentityModel.Logging (>= 6.7.1)
+      Microsoft.IdentityModel.Tokens (>= 6.7.1)
+    Microsoft.IdentityModel.Protocols.OpenIdConnect (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Microsoft.IdentityModel.Protocols (>= 6.7.1)
+      System.IdentityModel.Tokens.Jwt (>= 6.7.1)
+    Microsoft.IdentityModel.Tokens (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.CSharp (>= 4.5)
-      Microsoft.IdentityModel.Logging (>= 6.7)
+      Microsoft.IdentityModel.Logging (>= 6.7.1)
       System.Security.Cryptography.Cng (>= 4.5)
-    Microsoft.IO.RecyclableMemoryStream (1.3.4) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-    Microsoft.NETCore.Platforms (3.1.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.0) (>= netcoreapp5.0)) (&& (== netstandard2.1) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp5.0))
+    Microsoft.IO.RecyclableMemoryStream (1.3.5) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Microsoft.NETCore.Platforms (3.1.2) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.0) (>= netcoreapp5.0)) (&& (== netstandard2.1) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp5.0))
     Microsoft.NETCore.Targets (3.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.0) (>= netcoreapp5.0)) (&& (== netstandard2.1) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp5.0))
-    Microsoft.Tye.Extensions.Configuration (0.3.0-alpha.20319.3)
+    Microsoft.Tye.Extensions.Configuration (0.4.0-alpha.20371.1)
       Microsoft.Extensions.Configuration (>= 2.1.1)
     NETStandard.Library (2.0.3) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.NETCore.Platforms (>= 1.1)
     Newtonsoft.Json (12.0.3) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-    OneOf (2.1.151) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    OneOf (2.1.155) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       NETStandard.Library (>= 1.6.1)
-    Pulumi (2.5) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Pulumi (2.9) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Google.Protobuf (>= 3.10) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Grpc (>= 2.24) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       OneOf (>= 2.1.151) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
@@ -62,9 +63,9 @@ NUGET
       Serilog.Sinks.Console (>= 3.1.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Serilog.Sinks.File (>= 4.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       System.Collections.Immutable (>= 1.6) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-    Pulumi.FSharp (2.5)
-      FSharp.Core (>= 4.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Pulumi (>= 2.5) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+    Pulumi.FSharp (2.9)
+      FSharp.Core (>= 4.7.2) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Pulumi (>= 2.9) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
     runtime.native.System (4.3.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.NETCore.Platforms (>= 1.1.1)
       Microsoft.NETCore.Targets (>= 1.1.3)
@@ -96,9 +97,9 @@ NUGET
       Microsoft.NETCore.Platforms (>= 1.1)
       Microsoft.NETCore.Targets (>= 1.1)
       System.Runtime (>= 4.3)
-    System.IdentityModel.Tokens.Jwt (6.7) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
-      Microsoft.IdentityModel.JsonWebTokens (>= 6.7)
-      Microsoft.IdentityModel.Tokens (>= 6.7)
+    System.IdentityModel.Tokens.Jwt (6.7.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
+      Microsoft.IdentityModel.JsonWebTokens (>= 6.7.1)
+      Microsoft.IdentityModel.Tokens (>= 6.7.1)
     System.IO (4.3) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.NETCore.Platforms (>= 1.1)
       Microsoft.NETCore.Targets (>= 1.1)
@@ -143,7 +144,7 @@ NUGET
     System.Runtime (4.3.1) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.NETCore.Platforms (>= 1.1.1)
       Microsoft.NETCore.Targets (>= 1.1.3)
-    System.Runtime.CompilerServices.Unsafe (4.7.1) - restriction: || (== netstandard2.0) (== netstandard2.1)
+    System.Runtime.CompilerServices.Unsafe (4.7.1)
     System.Runtime.Handles (4.3) - restriction: || (== netcoreapp3.1) (&& (== netstandard2.0) (>= netcoreapp3.1)) (&& (== netstandard2.1) (>= netcoreapp3.1))
       Microsoft.NETCore.Platforms (>= 1.1)
       Microsoft.NETCore.Targets (>= 1.1)
@@ -201,26 +202,27 @@ GROUP infrastructure.app
 NUGET
   remote: https://www.nuget.org/api/v2
     FSharp.Core (4.7.2) - restriction: >= netcoreapp3.1
-    Glob (1.1.6) - restriction: >= netcoreapp3.1
-    Google.Protobuf (3.12.3) - restriction: >= netcoreapp3.1
-      System.Memory (>= 4.5.2) - restriction: || (>= net45) (>= netstandard2.0)
-    Grpc (2.30) - restriction: >= netcoreapp3.1
-      Grpc.Core (>= 2.30) - restriction: || (>= net45) (>= netstandard1.5)
-    Grpc.Core (2.30) - restriction: >= netcoreapp3.1
-      Grpc.Core.Api (>= 2.30) - restriction: || (>= net45) (>= netstandard1.5)
+    Glob (1.1.7) - restriction: >= netcoreapp3.1
+    Google.Protobuf (3.13) - restriction: >= netcoreapp3.1
+      System.Memory (>= 4.5.2) - restriction: >= netstandard1.1
+      System.Runtime.CompilerServices.Unsafe (>= 4.5.2) - restriction: && (< net45) (>= netstandard2.0)
+    Grpc (2.31) - restriction: >= netcoreapp3.1
+      Grpc.Core (>= 2.31) - restriction: || (>= net45) (>= netstandard1.5)
+    Grpc.Core (2.31) - restriction: >= netcoreapp3.1
+      Grpc.Core.Api (>= 2.31) - restriction: || (>= net45) (>= netstandard1.5)
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
-    Grpc.Core.Api (2.30) - restriction: >= netcoreapp3.1
+    Grpc.Core.Api (2.31) - restriction: >= netcoreapp3.1
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
     LibGit2Sharp (0.26.2)
       LibGit2Sharp.NativeBinaries (2.0.306) - restriction: || (>= net46) (>= netstandard2.0)
     LibGit2Sharp.NativeBinaries (2.0.306) - restriction: || (>= net46) (>= netstandard2.0)
-    Microsoft.NETCore.Platforms (3.1.1) - restriction: >= netcoreapp3.1
+    Microsoft.NETCore.Platforms (3.1.2) - restriction: >= netcoreapp3.1
     Microsoft.NETCore.Targets (3.1) - restriction: >= netcoreapp3.1
     NETStandard.Library (2.0.3) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (>= net45) (< netstandard1.3)) (&& (< net45) (>= netstandard1.1) (< netstandard1.2) (< win8)) (&& (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.3) (< netstandard1.4) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.4) (< netstandard1.5) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.5) (< netstandard1.6) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.6) (< netstandard2.0) (< win8) (< wpa81)) (&& (< net45) (>= netstandard2.0)) (&& (>= net46) (< netstandard1.4)) (>= net461) (>= netcoreapp2.0) (&& (>= netstandard1.0) (< portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= portable-net45+win8) (< win8)) (&& (< netstandard1.0) (< portable-net45+win8) (>= portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= portable-net45+win8+wp8+wpa81) (< portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= win8)) (&& (< netstandard1.3) (< win8) (>= wpa81)) (&& (< netstandard1.5) (>= uap10.0)) (>= uap10.1) (>= wp8)
-    OneOf (2.1.151) - restriction: >= netcoreapp3.1
+    OneOf (2.1.155) - restriction: >= netcoreapp3.1
       NETStandard.Library (>= 1.6.1) - restriction: && (< net45) (>= netstandard1.3)
-    Pulumi (2.5) - restriction: >= netcoreapp3.1
+    Pulumi (2.9) - restriction: >= netcoreapp3.1
       Google.Protobuf (>= 3.10) - restriction: >= netcoreapp3.1
       Grpc (>= 2.24) - restriction: >= netcoreapp3.1
       OneOf (>= 2.1.151) - restriction: >= netcoreapp3.1
@@ -228,19 +230,19 @@ NUGET
       Serilog.Sinks.Console (>= 3.1.1) - restriction: >= netcoreapp3.1
       Serilog.Sinks.File (>= 4.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.Azure (3.11)
-      Pulumi (>= 2.5) - restriction: >= netcoreapp3.1
+    Pulumi.Azure (3.18.1)
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
     Pulumi.Docker (2.2.3)
       Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
       Semver (>= 2.0.5) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.FSharp (2.5)
-      FSharp.Core (>= 4.7.1) - restriction: >= netcoreapp3.1
-      Pulumi (>= 2.5) - restriction: >= netcoreapp3.1
-    Pulumi.Kubernetes (2.3.1)
+    Pulumi.FSharp (2.9)
+      FSharp.Core (>= 4.7.2) - restriction: >= netcoreapp3.1
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
+    Pulumi.Kubernetes (2.5)
       Glob (>= 1.1.5) - restriction: >= netcoreapp3.1
-      Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
     runtime.native.System (4.3.1) - restriction: && (>= netcoreapp3.1) (< netcoreapp5.0)
       Microsoft.NETCore.Platforms (>= 1.1.1)
@@ -311,6 +313,7 @@ NUGET
     System.Runtime (4.3.1) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1.1) - restriction: || (&& (< monoandroid) (< monotouch) (< net45) (>= netstandard1.5) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< net45) (>= netstandard1.0) (< netstandard1.2) (< win8) (< wp8)) (&& (< monoandroid) (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< monoandroid) (< net45) (>= netstandard1.3) (< netstandard1.5) (< win8) (< wpa81)) (>= netcoreapp5.0)
       Microsoft.NETCore.Targets (>= 1.1.3) - restriction: || (&& (< monoandroid) (< monotouch) (< net45) (>= netstandard1.5) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< net45) (>= netstandard1.0) (< netstandard1.2) (< win8) (< wp8)) (&& (< monoandroid) (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< monoandroid) (< net45) (>= netstandard1.3) (< netstandard1.5) (< win8) (< wpa81)) (>= netcoreapp5.0)
+    System.Runtime.CompilerServices.Unsafe (4.7.1) - restriction: >= netcoreapp3.1
     System.Runtime.Handles (4.3) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: && (< monoandroid) (< monotouch) (< net46) (>= netstandard1.3) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)
       Microsoft.NETCore.Targets (>= 1.1) - restriction: && (< monoandroid) (< monotouch) (< net46) (>= netstandard1.3) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)
@@ -356,23 +359,24 @@ GROUP infrastructure.core
 NUGET
   remote: https://www.nuget.org/api/v2
     FSharp.Core (4.7.2) - restriction: >= netcoreapp3.1
-    Glob (1.1.6) - restriction: >= netcoreapp3.1
-    Google.Protobuf (3.12.3) - restriction: >= netcoreapp3.1
-      System.Memory (>= 4.5.2) - restriction: || (>= net45) (>= netstandard2.0)
-    Grpc (2.30) - restriction: >= netcoreapp3.1
-      Grpc.Core (>= 2.30) - restriction: || (>= net45) (>= netstandard1.5)
-    Grpc.Core (2.30) - restriction: >= netcoreapp3.1
-      Grpc.Core.Api (>= 2.30) - restriction: || (>= net45) (>= netstandard1.5)
+    Glob (1.1.7) - restriction: >= netcoreapp3.1
+    Google.Protobuf (3.13) - restriction: >= netcoreapp3.1
+      System.Memory (>= 4.5.2) - restriction: >= netstandard1.1
+      System.Runtime.CompilerServices.Unsafe (>= 4.5.2) - restriction: && (< net45) (>= netstandard2.0)
+    Grpc (2.31) - restriction: >= netcoreapp3.1
+      Grpc.Core (>= 2.31) - restriction: || (>= net45) (>= netstandard1.5)
+    Grpc.Core (2.31) - restriction: >= netcoreapp3.1
+      Grpc.Core.Api (>= 2.31) - restriction: || (>= net45) (>= netstandard1.5)
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
-    Grpc.Core.Api (2.30) - restriction: >= netcoreapp3.1
+    Grpc.Core.Api (2.31) - restriction: >= netcoreapp3.1
       System.Memory (>= 4.5.3) - restriction: || (>= net45) (>= netstandard1.5)
-    Microsoft.NETCore.Platforms (3.1.1) - restriction: >= netcoreapp3.1
+    Microsoft.NETCore.Platforms (3.1.2) - restriction: >= netcoreapp3.1
     Microsoft.NETCore.Targets (3.1) - restriction: >= netcoreapp3.1
     NETStandard.Library (2.0.3) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (>= net45) (< netstandard1.3)) (&& (< net45) (>= netstandard1.1) (< netstandard1.2) (< win8)) (&& (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.3) (< netstandard1.4) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.4) (< netstandard1.5) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.5) (< netstandard1.6) (< win8) (< wpa81)) (&& (< net45) (>= netstandard1.6) (< netstandard2.0) (< win8) (< wpa81)) (&& (< net45) (>= netstandard2.0)) (&& (>= net46) (< netstandard1.4)) (>= net461) (>= netcoreapp2.0) (&& (>= netstandard1.0) (< portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= portable-net45+win8) (< win8)) (&& (< netstandard1.0) (< portable-net45+win8) (>= portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= portable-net45+win8+wp8+wpa81) (< portable-net45+win8+wpa81)) (&& (< netstandard1.0) (>= win8)) (&& (< netstandard1.3) (< win8) (>= wpa81)) (&& (< netstandard1.5) (>= uap10.0)) (>= uap10.1) (>= wp8)
-    OneOf (2.1.151) - restriction: >= netcoreapp3.1
+    OneOf (2.1.155) - restriction: >= netcoreapp3.1
       NETStandard.Library (>= 1.6.1) - restriction: && (< net45) (>= netstandard1.3)
-    Pulumi (2.5) - restriction: >= netcoreapp3.1
+    Pulumi (2.9) - restriction: >= netcoreapp3.1
       Google.Protobuf (>= 3.10) - restriction: >= netcoreapp3.1
       Grpc (>= 2.24) - restriction: >= netcoreapp3.1
       OneOf (>= 2.1.151) - restriction: >= netcoreapp3.1
@@ -380,24 +384,24 @@ NUGET
       Serilog.Sinks.Console (>= 3.1.1) - restriction: >= netcoreapp3.1
       Serilog.Sinks.File (>= 4.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.Azure (3.11)
-      Pulumi (>= 2.5) - restriction: >= netcoreapp3.1
+    Pulumi.Azure (3.18.1)
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.AzureAD (2.3)
-      Pulumi (>= 2.3) - restriction: >= netcoreapp3.1
+    Pulumi.AzureAD (2.5.1)
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.FSharp (2.5)
-      FSharp.Core (>= 4.7.1) - restriction: >= netcoreapp3.1
-      Pulumi (>= 2.5) - restriction: >= netcoreapp3.1
-    Pulumi.Kubernetes (2.3.1)
+    Pulumi.FSharp (2.9)
+      FSharp.Core (>= 4.7.2) - restriction: >= netcoreapp3.1
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
+    Pulumi.Kubernetes (2.5)
       Glob (>= 1.1.5) - restriction: >= netcoreapp3.1
-      Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.Random (2.1.3)
-      Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
+    Pulumi.Random (2.3.1)
+      Pulumi (>= 2.9) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
-    Pulumi.Tls (2.1.3)
-      Pulumi (>= 2.4) - restriction: >= netcoreapp3.1
+    Pulumi.Tls (2.2)
+      Pulumi (>= 2.7.1) - restriction: >= netcoreapp3.1
       System.Collections.Immutable (>= 1.6) - restriction: >= netcoreapp3.1
     runtime.native.System (4.3.1) - restriction: && (>= netcoreapp3.1) (< netcoreapp5.0)
       Microsoft.NETCore.Platforms (>= 1.1.1)
@@ -466,6 +470,7 @@ NUGET
     System.Runtime (4.3.1) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1.1) - restriction: || (&& (< monoandroid) (< monotouch) (< net45) (>= netstandard1.5) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< net45) (>= netstandard1.0) (< netstandard1.2) (< win8) (< wp8)) (&& (< monoandroid) (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< monoandroid) (< net45) (>= netstandard1.3) (< netstandard1.5) (< win8) (< wpa81)) (>= netcoreapp5.0)
       Microsoft.NETCore.Targets (>= 1.1.3) - restriction: || (&& (< monoandroid) (< monotouch) (< net45) (>= netstandard1.5) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< net45) (>= netstandard1.0) (< netstandard1.2) (< win8) (< wp8)) (&& (< monoandroid) (< net45) (>= netstandard1.2) (< netstandard1.3) (< win8) (< wpa81)) (&& (< monoandroid) (< net45) (>= netstandard1.3) (< netstandard1.5) (< win8) (< wpa81)) (>= netcoreapp5.0)
+    System.Runtime.CompilerServices.Unsafe (4.7.1) - restriction: >= netcoreapp3.1
     System.Runtime.Handles (4.3) - restriction: >= netcoreapp3.1
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: && (< monoandroid) (< monotouch) (< net46) (>= netstandard1.3) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)
       Microsoft.NETCore.Targets (>= 1.1) - restriction: && (< monoandroid) (< monotouch) (< net46) (>= netstandard1.3) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)

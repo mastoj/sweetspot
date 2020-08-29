@@ -219,7 +219,7 @@ module Helpers =
 
     type TopicWithAuthorization = 
         { 
-            TopicName: string
+            Topic: Topic
             ReadConnectionString: Output<string>
             SendReadConnectionString: Output<string>
         }
@@ -241,7 +241,7 @@ module Helpers =
         let topicSendListenRule = createTopicSharedAccessAuthRule resourceGroup servicebusNamespace topic sendListenRuleName (modifyRule |> Some)
 
         {
-            TopicName = topicName
+            Topic = topic
             ReadConnectionString = topicReadRule.PrimaryConnectionString
             SendReadConnectionString = topicSendListenRule.PrimaryConnectionString
         }
@@ -280,11 +280,8 @@ let infra () =
     let servicebusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
     let sharedAccessAuthRule = Helpers.createNamespaceSharedAccessAuthRule resourceGroup servicebusNamespace "SendListen"
 
-    let (topic, Helpers.createTopicWithAuthorizations resourceGroup servicebusNamespace topicName None
-    let topics = 
-        [ 1 .. 5 ]
-        |> List.map ((sprintf "topic_%i") >> createTopic)
-
+    let topicName = "sample"
+    let topicWithAuth = Helpers.createTopicWithAuthorizations resourceGroup servicebusNamespace topicName None
 
     let provider =
         Pulumi.Kubernetes.Provider("k8s",
@@ -316,15 +313,11 @@ let infra () =
     let kubeconfigSecret = cluster.KubeConfigRaw.Apply<string>(makeSecret)
 
     let topicOutputs =
-        topics
-        |> List.collect (fun (topicName, (topic, listenConn, sendConn)) ->
-            [
-                (topicName, topic.Name :> obj)
-                (sprintf "%s_listen_endpoint" topicName, listenConn.Apply<string>(makeSecret) :> obj)
-                (sprintf "%s_send_endpoint" topicName, sendConn.Apply<string>(makeSecret) :> obj)
-            ]            
-        )
-
+        [
+            (topicName, topicWithAuth.Topic.Name :> obj)
+            (sprintf "%s_listen_endpoint" topicName, topicWithAuth.ReadConnectionString.Apply<string>(makeSecret) :> obj)
+            (sprintf "%s_send_endpoint" topicName, topicWithAuth.SendReadConnectionString.Apply<string>(makeSecret) :> obj)
+        ]            
 
     // Export the kubeconfig string for the storage account     
     dict 

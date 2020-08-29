@@ -11,6 +11,11 @@ open Pulumi.Azure.CosmosDB
 open Pulumi.Azure.CosmosDB.Inputs
 open System
 
+let createSubscription subName =
+    let args = SubscriptionArgs(
+        ResourceGroupName = 
+    )
+    Subscription(subName, args)
 
 let deployApps (stack: StackReference) =
 
@@ -19,9 +24,9 @@ let deployApps (stack: StackReference) =
         |> getClusterConfig "kubeconfig"
         |> getK8sProvider "k8s" "app"
 
-    let sbConnectionString = stack |> getStackOutput "sbConnectionstring"
+    let sbConnectionString = getStackOutput "sample_send_endpoint" stack
     let inputMap = 
-        ["connectionstring", io (sbConnectionString.Apply(fun s -> s |> toBase64))]
+        ["sbconnectionstring", io (sbConnectionString.Apply(fun s -> s |> toBase64))]
         |> inputMap
         |> InputMap
 
@@ -52,12 +57,14 @@ let deployApps (stack: StackReference) =
         ) 
 
 let deployAppInfrastructure (stack: StackReference) =
-    let topic = createServiceBusTopic stack "sweetspot-dev-web-topic"
-    let subscription = createServiceBusSubscription stack topic "sweetspot-dev-web-topic-worker-sub"
+    let resourceGroupName = getStackOutput "resourceGroupName" stack
+    let serviceBusNamespace = getStackOutput "servicebusNamespace" stack
+    let topicName = getStackOutput "sample" stack
+
+    let subscription = createServiceBusSubscription (io resourceGroupName) (io serviceBusNamespace) (io topicName) "sample-sub"
     let cosmosDb = createCosmosDb stack "sweetspotdb" id
 
     [
-        "topic", topic.Name :> obj
         "subscription", subscription.Name :> obj
         "dbMasterKey", (cosmosDb.PrimaryMasterKey.Apply<string>(makeSecret)) :> obj
         "dbEndpoint", cosmosDb.Endpoint :> obj

@@ -21,16 +21,13 @@ let createServiceBusTopic (stack: StackReference) topicName =
         )
     )
 
-let createServiceBusSubscription (stack: StackReference) (topic: Topic) subscriptionName =
-    let resourceGroupName = getStackOutput "resourceGroupName" stack
-    let serviceBusNamespace = getStackOutput "servicebusNamespace" stack
-    
+let createServiceBusSubscription resourceGroupName namespaceName topicName subscriptionName =
     Subscription(subscriptionName,
         SubscriptionArgs(
             Name = input subscriptionName,
-            ResourceGroupName = io resourceGroupName,
-            NamespaceName = io serviceBusNamespace,
-            TopicName = io (topic.Name),
+            ResourceGroupName = resourceGroupName,
+            NamespaceName = namespaceName,
+            TopicName = topicName,
             MaxDeliveryCount = input 3
         )
     )

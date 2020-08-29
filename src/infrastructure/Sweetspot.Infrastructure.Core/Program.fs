@@ -17,14 +17,9 @@ open Pulumi.Azure.Storage.Inputs
 
 [<RequireQualifiedAccess>]
 module Helpers =
-    let x = AccountNetworkRulesArgs()
-    let y = Pulumi.Kubernetes.AdmissionRegistration.V1.MutatingWebhookConfiguration("")
 
     let createResourceGroup name = 
-        ResourceGroup(name, 
-            ResourceGroupArgs(
-                Name = input name
-            ))
+        ResourceGroup(name)
 
     let createPassword name =
         RandomPassword(name, 
@@ -52,7 +47,7 @@ module Helpers =
             ServicePrincipalPasswordArgs(
                 ServicePrincipalId = io servicePrincipal.Id,
                 Value = io password.Result,
-                EndDate = input "2099-01-01T00:00:00Z"
+                EndDate = input "2098-01-01T00:00:00Z"
             ))
 
     let assignNetworkContributorRole name (servicePrincipal: ServicePrincipal) (resourceGroup: ResourceGroup) =
@@ -182,7 +177,7 @@ module Helpers =
             )
         serviceBus
 
-    let createSharedAccessAuthRule (rg: ResourceGroup) (servicebusNamespace: Namespace) (key: string) =
+    let createNamespaceSharedAccessAuthRule (rg: ResourceGroup) (servicebusNamespace: Namespace) (key: string) =
         NamespaceAuthorizationRule(
             key,
             NamespaceAuthorizationRuleArgs(
@@ -192,6 +187,53 @@ module Helpers =
                 ResourceGroupName = io rg.Name,
                 NamespaceName = io servicebusNamespace.Name
             )
+        )
+    
+    let createTopic (rg: ResourceGroup) (servicebusNamespace: Namespace) (topicName: string) (argsModifier: (TopicArgs -> TopicArgs) option) =
+        let args = 
+            TopicArgs(
+                ResourceGroupName = io (rg.Name),
+                NamespaceName = io (servicebusNamespace.Name)
+            ) 
+            |> (Option.defaultValue id argsModifier)
+        Topic(topicName,
+            args
+        )
+
+    let createTopicSharedAccessAuthRule (rg: ResourceGroup) (servicebusNamespace: Namespace) (topic: Topic) (key: string) (argsModifier: (TopicAuthorizationRuleArgs -> TopicAuthorizationRuleArgs) option) =
+        let args =
+            TopicAuthorizationRuleArgs(
+                Listen = input true,
+                Manage = input false,
+                Send = input false,
+                ResourceGroupName = io rg.Name,
+                TopicName = io topic.Name,
+                NamespaceName = io servicebusNamespace.Name
+            )
+            |> (Option.defaultValue id argsModifier)
+
+        TopicAuthorizationRule(
+            key,
+            args
+        )
+
+    let createTopicWithAuthorizations (resourceGroup: ResourceGroup) (servicebusNamespace: Namespace) (topicName: string)  (topicModifier : (TopicArgs -> TopicArgs) option) =
+        let topic = createTopic resourceGroup servicebusNamespace topicName topicModifier
+        let listenRuleName = sprintf "%sL" topicName
+        let topicReadRule = createTopicSharedAccessAuthRule resourceGroup servicebusNamespace topic listenRuleName None
+        
+        let modifyRule (rule: TopicAuthorizationRuleArgs) =
+            rule.Send <- input true
+            rule
+
+        let sendListenRuleName = sprintf "%sSL" topicName
+        let topicSendListenRule = createTopicSharedAccessAuthRule resourceGroup servicebusNamespace topic sendListenRuleName (modifyRule |> Some)
+
+        (topic, topicReadRule.PrimaryConnectionString, topicSendListenRule.PrimaryConnectionString)
+    
+    let createSubscriptio (resourceGroup: ResourceGroup) (servicebusNamespace: Namespace) =
+        Subscription(
+            "", SubscriptionArgs()
         )
 
 let infra () =
@@ -210,7 +252,7 @@ let infra () =
     let networkAssignment = Helpers.createNetworkAssignment "subnetassignment" subnet servicePrincipal
 
     let nodeCount = 3
-    let kubernetesVersion = "1.16.7"
+    let kubernetesVersion = "1.18.6"
 
     let cluster =
         Helpers.createCluster
@@ -225,43 +267,69 @@ let infra () =
             kubernetesVersion
             nodeCount
 
-    let serviceBusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
-    let sharedAccessAuthRule = Helpers.createSharedAccessAuthRule resourceGroup serviceBusNamespace "ReadListen"
+    let servicebusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
+    let sharedAccessAuthRule = Helpers.createNamespaceSharedAccessAuthRule resourceGroup servicebusNamespace "SendListen"
 
+    let createTopic topicName = topicName, Helpers.createTopicWithAuthorizations resourceGroup servicebusNamespace topicName None
+    let topics = 
+        [ 1 .. 5 ]
+        |> List.map ((sprintf "topic_%i") >> createTopic)
+
+
+    let provider =
+        Pulumi.Kubernetes.Provider("k8s",
+            Pulumi.Kubernetes.ProviderArgs(
+                KubeConfig = io cluster.KubeConfigRaw
+            )        
+        )
+
+    let options = ComponentResourceOptions(Provider = provider)
     ConfigFile("linkerd",
         ConfigFileArgs(
             File = input "manifests/linkerd.yaml"
-        )) |> ignore
+        ), options = options) |> ignore
 
     ConfigFile("k8sdashboard",
         ConfigFileArgs(
             File = input "manifests/dashboard.yaml"
-        )) |> ignore
+        ), options = options) |> ignore
 
 
     ConfigFile("app",
         ConfigFileArgs(
             File = input "manifests/app.yaml"
-        )) |> ignore
+        ), options = options) |> ignore
 
     let makeSecret = Func<string, Output<string>>(Output.CreateSecret)
     let adminPassword = containerRegistry.AdminPassword.Apply<string>(makeSecret)
     let sbConnectionstring = sharedAccessAuthRule.PrimaryConnectionString.Apply<string>(makeSecret)
     let kubeconfigSecret = cluster.KubeConfigRaw.Apply<string>(makeSecret)
-//        containerRegistry.AdminPassword.Apply<string, Output<string>>(fun (s: string) -> Output.CreateSecret(s))
+
+    let topicOutputs =
+        topics
+        |> List.collect (fun (topicName, (topic, listenConn, sendConn)) ->
+            [
+                (topicName, topic.Name :> obj)
+                (sprintf "%s_listen_endpoint" topicName, listenConn.Apply<string>(makeSecret) :> obj)
+                (sprintf "%s_send_endpoint" topicName, sendConn.Apply<string>(makeSecret) :> obj)
+            ]            
+        )
+
+
     // Export the kubeconfig string for the storage account     
-    dict [
-        ("resourceGroupName", resourceGroup.Name :> obj)
-        ("kubeconfig", kubeconfigSecret :> obj)
-        ("registryId", containerRegistry.Id :> obj)
-        ("registryName", containerRegistry.Name :> obj)
-        ("registryLoginServer", containerRegistry.LoginServer :> obj)
-        ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
-        ("registryAdminPassword", adminPassword :> obj)
-        ("servicebusNamespace", serviceBusNamespace.Name :> obj)
-        ("sbConnectionstring", sbConnectionstring :> obj)
-        ("location", resourceGroup.Location :> obj)
-    ]
+    dict 
+        ([
+            ("resourceGroupName", resourceGroup.Name :> obj)
+            ("kubeconfig", kubeconfigSecret :> obj)
+            ("registryId", containerRegistry.Id :> obj)
+            ("registryName", containerRegistry.Name :> obj)
+            ("registryLoginServer", containerRegistry.LoginServer :> obj)
+            ("registryAdminUsername", containerRegistry.AdminUsername :> obj)
+            ("registryAdminPassword", adminPassword :> obj)
+            ("servicebusNamespace", servicebusNamespace.Name :> obj)
+            ("sbConnectionstring", sbConnectionstring :> obj)
+            ("location", resourceGroup.Location :> obj)
+        ] @ topicOutputs)
 
 [<EntryPoint>]
 let main _ =

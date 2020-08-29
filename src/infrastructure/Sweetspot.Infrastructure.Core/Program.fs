@@ -217,7 +217,18 @@ module Helpers =
             args
         )
 
-    let createTopicWithAuthorizations (resourceGroup: ResourceGroup) (servicebusNamespace: Namespace) (topicName: string)  (topicModifier : (TopicArgs -> TopicArgs) option) =
+    type TopicWithAuthorization = 
+        { 
+            TopicName: string
+            ReadConnectionString: Output<string>
+            SendReadConnectionString: Output<string>
+        }
+
+    let createTopicWithAuthorizations 
+            (resourceGroup: ResourceGroup) 
+            (servicebusNamespace: Namespace) 
+            (topicName: string)
+            (topicModifier : (TopicArgs -> TopicArgs) option) =
         let topic = createTopic resourceGroup servicebusNamespace topicName topicModifier
         let listenRuleName = sprintf "%sL" topicName
         let topicReadRule = createTopicSharedAccessAuthRule resourceGroup servicebusNamespace topic listenRuleName None
@@ -229,12 +240,11 @@ module Helpers =
         let sendListenRuleName = sprintf "%sSL" topicName
         let topicSendListenRule = createTopicSharedAccessAuthRule resourceGroup servicebusNamespace topic sendListenRuleName (modifyRule |> Some)
 
-        (topic, topicReadRule.PrimaryConnectionString, topicSendListenRule.PrimaryConnectionString)
-    
-    let createSubscriptio (resourceGroup: ResourceGroup) (servicebusNamespace: Namespace) =
-        Subscription(
-            "", SubscriptionArgs()
-        )
+        {
+            TopicName = topicName
+            ReadConnectionString = topicReadRule.PrimaryConnectionString
+            SendReadConnectionString = topicSendListenRule.PrimaryConnectionString
+        }
 
 let infra () =
     let resourceGroupName = "sweetspot-rg"
@@ -270,7 +280,7 @@ let infra () =
     let servicebusNamespace = Helpers.createServiceBus resourceGroup "sweetspot-dev"
     let sharedAccessAuthRule = Helpers.createNamespaceSharedAccessAuthRule resourceGroup servicebusNamespace "SendListen"
 
-    let createTopic topicName = topicName, Helpers.createTopicWithAuthorizations resourceGroup servicebusNamespace topicName None
+    let (topic, Helpers.createTopicWithAuthorizations resourceGroup servicebusNamespace topicName None
     let topics = 
         [ 1 .. 5 ]
         |> List.map ((sprintf "topic_%i") >> createTopic)

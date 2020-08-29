@@ -1,17 +1,18 @@
 #r "paket:
+nuget Fantomas.Extras
 nuget Fake.IO.FileSystem
 nuget Fake.DotNet.Cli
-nuget Fake.Core.Target 
-nuget Fake.Tools.Git //"
+nuget Fake.Core.Target //"
 #load "./.fake/build.fsx/intellisense.fsx"
 
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
 open Fake.IO.Globbing.Operators
-open Fake.Tools.Git
-open System.IO
+open Fantomas.Extras.FakeHelpers
+open Fantomas.FormatConfig
 
+let fantomasConfig = { FormatConfig.Default with MaxLineLength = 140 }
 
 // Properties
 let buildDir = "./.build/"
@@ -77,6 +78,18 @@ Target.create "Deploy" (fun _ ->
     runPulumiSelectStack "dev" "./src/infrastructure/Sweetspot.Infrastructure.Application"
     runPulumiUp "./src/infrastructure/Sweetspot.Infrastructure.Application"
 )
+
+Target.create "CheckCodeFormat" (fun _ ->
+    !!"**/**/**/*.fs"
+    |> checkCode
+    |> Async.RunSynchronously
+    |> printfn "Format check result: %A")
+
+Target.create "Format" (fun _ ->
+    !!"**/**/**/*.fs"
+    |> formatCode
+    |> Async.RunSynchronously
+    |> printfn "Formatted files: %A")
 
 open Fake.Core.TargetOperators
 

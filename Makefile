@@ -19,5 +19,8 @@ publish: restore-tool ## Build and publish apps
 deploy: restore-tool ## Deploys the apps
 	dotnet fake build target Deploy
 
+format: restore-tool ## Format code
+	dotnet fake build target Format
+
 deploy-core-infra: ## Deploys the core infrastructure
 	pulumi up -y -C src/infrastructure/Sweetspot.Infrastructure.Core

@@ -9,38 +9,36 @@ open System.Net.Http
 open System.Text.Json
 
 [<CLIMutable>]
-type WeatherForecast = {
-    Date: DateTime
-    TemperatureC: int
-    Summary: string
-//        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+type WeatherForecast =
+    { Date: DateTime
+      TemperatureC: int
+      Summary: string }
 
-type WeatherClient = {
-    GetWeather: unit -> Async<WeatherForecast []>
-}
+type WeatherClient =
+    { GetWeather: unit -> Async<WeatherForecast []> }
 
 module WeatherClient =
     let client (baseAddress: Uri) =
-        let client = 
-            new HttpClient(
-                BaseAddress = baseAddress
-            )
-        let options = 
-            JsonSerializerOptions(
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            )
+        let client =
+            new HttpClient(BaseAddress = baseAddress)
 
-        let getWeather() =
+        let options =
+            JsonSerializerOptions(PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase)
+
+        let getWeather () =
             async {
-                let! responseMessage = client.GetAsync("/weatherforecast") |> Async.AwaitTask
-                let! stream = responseMessage.Content.ReadAsStringAsync() |> Async.AwaitTask
-                return JsonSerializer.Deserialize<WeatherForecast[]>(stream, options)
+                let! responseMessage =
+                    client.GetAsync("/weatherforecast")
+                    |> Async.AwaitTask
+
+                let! stream =
+                    responseMessage.Content.ReadAsStringAsync()
+                    |> Async.AwaitTask
+
+                return JsonSerializer.Deserialize<WeatherForecast []>(stream, options)
             }
-        {
-            GetWeather = getWeather
-        }
+
+        { GetWeather = getWeather }
 
 type Hello = { Wat: string }
 
@@ -49,16 +47,21 @@ let messagesHandler next (ctx: HttpContext) =
     task {
         let! response = weatherClient.GetWeather()
         let! hello = ctx.BindJsonAsync<Hello>()
-        let response = { Wat = (sprintf "Hello again %s: %A" hello.Wat response) }
+
+        let response =
+            { Wat = (sprintf "Hello again %s: %A" hello.Wat response) }
+
         return! ctx.WriteJsonAsync response
     }
 
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
+
 let getServiceUri (sp: IServiceProvider) (tyeName: string) (serviceName: string) =
-    let baseUri = TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "sweetspot.csharpworker", null)
-    if baseUri |> isNull
-    then
+    let baseUri =
+        TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "sweetspot.csharpworker", null)
+
+    if baseUri |> isNull then
         let url = sprintf "http://%s" serviceName
         Uri(url)
     else
@@ -68,24 +71,26 @@ let helloHandler next (ctx: HttpContext) =
     let weatherClient: WeatherClient = ctx.GetService<WeatherClient>()
     task {
         let! response = weatherClient.GetWeather()
-        let response = { Wat = (sprintf "Hello again wat: %A" response) }
+
+        let response =
+            { Wat = (sprintf "Hello again wat: %A" response) }
+
         return! ctx.WriteJsonAsync response
     }
 
-let apiRoutes = router {
-    post "/api/messages" messagesHandler    
-}
+let apiRoutes =
+    router { post "/api/messages" messagesHandler }
 
-let webRoutes = router {
-    get "/" helloHandler
-}
+let webRoutes = router { get "/" helloHandler }
 
 let app =
 
     let configureServices (services: IServiceCollection) =
-        
-        services.AddScoped<WeatherClient>(fun sp -> 
-            let baseUri = getServiceUri sp "sweetspot.csharpworker" "sweetspotcsharpworker"
+
+        services.AddScoped<WeatherClient>(fun sp ->
+            let baseUri =
+                getServiceUri sp "sweetspot.csharpworker" "sweetspotcsharpworker"
+
             printfn "==> Wat: %A" baseUri
             printfn "==> Uri from tye: %A" baseUri
             WeatherClient.client baseUri)
@@ -100,7 +105,10 @@ let app =
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
-    let sbconnection = System.Environment.GetEnvironmentVariable("SB_CONNECTIONSTRING")
+
+    let sbconnection =
+        System.Environment.GetEnvironmentVariable("SB_CONNECTIONSTRING")
+
     printfn "==> Hello conn: %s" sbconnection
     run (app)
     0

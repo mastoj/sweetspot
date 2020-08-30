@@ -11,3 +11,5 @@ paket-files
 .build/
 .tmp/
 .fake_*/
+
+kubeconfig.yaml

@@ -80,13 +80,13 @@ Target.create "Deploy" (fun _ ->
 )
 
 Target.create "CheckCodeFormat" (fun _ ->
-    !!"**/**/**/*.fs"
+    !!"src/**/**/*.fs"
     |> checkCode
     |> Async.RunSynchronously
     |> printfn "Format check result: %A")
 
 Target.create "Format" (fun _ ->
-    !!"**/**/**/*.fs"
+    !!"src/**/**/*.fs"
     |> formatCode
     |> Async.RunSynchronously
     |> printfn "Formatted files: %A")

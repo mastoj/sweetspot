@@ -1,4 +1,4 @@
-module Program
+﻿module Program
 
 open Pulumi
 open Pulumi.FSharp
@@ -11,6 +11,24 @@ open Pulumi.Azure.CosmosDB
 open Pulumi.Azure.CosmosDB.Inputs
 open System
 
+let getTopicConfigInputMap topicKey stack =
+    let sendEndpoint =
+        getStackOutput (sprintf "%s_send_endpoint" topicKey) stack
+
+    let listenEndpoint =
+        getStackOutput (sprintf "%s_listen_endpoint" topicKey) stack
+
+    let topicName =
+        getStackOutput topicKey stack
+
+    [
+        "SB_SAMPLE_TOPIC", io (sendEndpoint.Apply(fun s -> s |> toBase64))
+        "SB_SAMPLE_ENDPOINT_LISTEN", io (listenEndpoint.Apply(fun s -> s |> toBase64))
+        "SB_SAMPLE_ENDPOINT_SEND", io (topicName.Apply(fun s -> s |> toBase64))
+
+    ]
+    |> inputMap
+    |> InputMap
 
 let deployApps (stack: StackReference) =
 
@@ -19,25 +37,31 @@ let deployApps (stack: StackReference) =
         |> getClusterConfig "kubeconfig"
         |> getK8sProvider "k8s" "app"
 
-    let sbConnectionString =
+    let sampleSendEndpoint =
         getStackOutput "sample_send_endpoint" stack
 
-    let inputMap =
-        [ "sbconnectionstring", io (sbConnectionString.Apply(fun s -> s |> toBase64)) ]
-        |> inputMap
-        |> InputMap
+    let sampleSendEndpoint =
+        getStackOutput "sample_listen_endpoint" stack
+
+    let sampleTopicInputMap = getTopicConfigInputMap "sample" stack
 
     let secret =
-        createSecret k8sCluster "servicebus" inputMap
+        createSecret k8sCluster "servicebus" sampleTopicInputMap
 
-    let addSbConnectionString =
-        addSecret "SB_CONNECTIONSTRING" "sbconnectionstring" secret
+    let addSampleTopicSecret =
+        addSecret "SB_SAMPLE_TOPIC" "SB_SAMPLE_TOPIC" secret
+
+    let addSendEndpointSecret =
+        addSecret "SB_SAMPLE_ENDPOINT_LISTEN" "SB_SAMPLE_ENDPOINT_LISTEN" secret
+
+    let addListenEndpointSecret =
+        addSecret "SB_SAMPLE_ENDPOINT_SEND" "SB_SAMPLE_ENDPOINT_SEND" secret
 
     let workerName = "sweetspotcsharpworker"
 
     let worker =
         createApplicationConfig (ApplicationName workerName) (ImageName "sweetspot.csharpworker")
-        |> addSbConnectionString
+        |> (addSampleTopicSecret >> addListenEndpointSecret)
         |> withLoadbalancer
         |> createApplication stack k8sCluster
 
@@ -45,7 +69,7 @@ let deployApps (stack: StackReference) =
 
     let web =
         createApplicationConfig (ApplicationName webName) (ImageName "sweetspot.web")
-        |> addSbConnectionString
+        |> (addSampleTopicSecret >> addSendEndpointSecret)
         |> withLoadbalancer
         |> createApplication stack k8sCluster
 

@@ -28,3 +28,6 @@ deploy-core-infra: ## Deploys the core infrastructure
 kubedev: ## Get dev kubeconfig and export config variable
 	pulumi stack output kubeconfig --show-secrets -C src/infrastructure/Sweetspot.Infrastructure.Core > kubeconfig.yaml
 	echo "Run > export KUBECONFIG=`pwd`/kubeconfig.yaml"
+
+devconfig: ## Configure dev env variables
+	scripts/set_dev_env.sh

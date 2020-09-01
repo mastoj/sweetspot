@@ -11,6 +11,7 @@ open Fake.IO
 open Fake.IO.Globbing.Operators
 open Fantomas.Extras.FakeHelpers
 open Fantomas.FormatConfig
+open System.Diagnostics
 
 let fantomasConfig = { FormatConfig.Default with MaxLineLength = 140 }
 
@@ -80,13 +81,14 @@ Target.create "Deploy" (fun _ ->
 )
 
 Target.create "CheckCodeFormat" (fun _ ->
-    !!"src/**/**/*.fs"
+    !!"src/*/*/*.fs"
     |> checkCode
     |> Async.RunSynchronously
     |> printfn "Format check result: %A")
 
 Target.create "Format" (fun _ ->
-    !!"src/**/**/*.fs"
+    !!"src/*/*/*.fs"
+    |> Seq.map(fun f -> printfn "File: %A" f; f)
     |> formatCode
     |> Async.RunSynchronously
     |> printfn "Formatted files: %A")

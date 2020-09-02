@@ -13,3 +13,5 @@ paket-files
 .fake_*/
 
 kubeconfig.yaml
+kubeconfig
+dev.env

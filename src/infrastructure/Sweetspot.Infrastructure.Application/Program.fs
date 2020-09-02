@@ -22,10 +22,9 @@ let getTopicConfigInputMap topicKey stack =
         getStackOutput topicKey stack
 
     [
-        "SB_SAMPLE_TOPIC", io (sendEndpoint.Apply(fun s -> s |> toBase64))
-        "SB_SAMPLE_ENDPOINT_LISTEN", io (listenEndpoint.Apply(fun s -> s |> toBase64))
-        "SB_SAMPLE_ENDPOINT_SEND", io (topicName.Apply(fun s -> s |> toBase64))
-
+        (sprintf "SB_%s_TOPIC" topicKey).ToUpper(), io (sendEndpoint.Apply(fun s -> s |> toBase64))
+        (sprintf "SB_%s_ENDPOINT_LISTEN" topicKey).ToUpper(), io (listenEndpoint.Apply(fun s -> s |> toBase64))
+        (sprintf "SB_%s_ENDPOINT_SEND" topicKey).ToUpper(), io (topicName.Apply(fun s -> s |> toBase64))
     ]
     |> inputMap
     |> InputMap
@@ -46,7 +45,7 @@ let deployApps (stack: StackReference) =
     let sampleTopicInputMap = getTopicConfigInputMap "sample" stack
 
     let secret =
-        createSecret k8sCluster "servicebus" sampleTopicInputMap
+        createSecret k8sCluster "sb-sample" sampleTopicInputMap
 
     let addSampleTopicSecret =
         addSecret "SB_SAMPLE_TOPIC" "SB_SAMPLE_TOPIC" secret

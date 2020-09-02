@@ -7,6 +7,33 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.ContextInsensitive
 open System.Net.Http
 open System.Text.Json
+open Microsoft.Azure.ServiceBus
+
+type AppConfig = {
+    TopicName: string
+    TopicEndpoint: string
+}
+
+let readConfig() = 
+    {
+        TopicName = System.Environment.GetEnvironmentVariable("SB_SAMPLE_TOPIC")
+        TopicEndpoint = System.Environment.GetEnvironmentVariable("SB_SAMPLE_ENDPOINT_SEND")
+    }
+
+module ServiceBus =
+    let createTopicClient topicEndpoint =
+        let stringBuilder = ServiceBusConnectionStringBuilder(topicEndpoint)
+        TopicClient(stringBuilder)
+    
+    let sendMessage (topicClient: TopicClient) msg =
+        async {
+            try
+                let messageBody = sprintf "Message: %A" msg
+                let message = Message(System.Text.Encoding.UTF8.GetBytes messageBody)
+                do! topicClient.SendAsync(message) |> Async.AwaitTask
+            with ex ->
+                printfn "%O :: Exception: %s" DateTime.Now ex.Message
+        }
 
 [<CLIMutable>]
 type WeatherForecast =
@@ -59,7 +86,7 @@ open Microsoft.Extensions.DependencyInjection
 
 let getServiceUri (sp: IServiceProvider) (tyeName: string) (serviceName: string) =
     let baseUri =
-        TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), "sweetspot.csharpworker", null)
+        TyeConfigurationExtensions.GetServiceUri(sp.GetService<IConfiguration>(), tyeName, null)
 
     if baseUri |> isNull then
         let url = sprintf "http://%s" serviceName
@@ -67,11 +94,15 @@ let getServiceUri (sp: IServiceProvider) (tyeName: string) (serviceName: string)
     else
         baseUri
 
-let helloHandler next (ctx: HttpContext) =
+let helloHandler appConfig next (ctx: HttpContext) =
     let weatherClient: WeatherClient = ctx.GetService<WeatherClient>()
+    let topicClient = ServiceBus.createTopicClient appConfig.TopicEndpoint
+    printfn "==> Making request"
     task {
-        let! response = weatherClient.GetWeather()
+        do! "hello world service bus" |> ServiceBus.sendMessage topicClient
 
+        let! response = weatherClient.GetWeather()
+        printfn "==> Got some response: %A" response
         let response =
             { Wat = (sprintf "Hello again wat: %A" response) }
 
@@ -81,15 +112,15 @@ let helloHandler next (ctx: HttpContext) =
 let apiRoutes =
     router { post "/api/messages" messagesHandler }
 
-let webRoutes = router { get "/" helloHandler }
+let webRoutes appConfig = router { get "/" (helloHandler appConfig) }
 
-let app =
+let app appConfig =
 
     let configureServices (services: IServiceCollection) =
 
         services.AddScoped<WeatherClient>(fun sp ->
             let baseUri =
-                getServiceUri sp "sweetspot.csharpworker" "sweetspotcsharpworker"
+                getServiceUri sp "csharpworker" "sweetspotcsharpworker"
 
             printfn "==> Wat: %A" baseUri
             printfn "==> Uri from tye: %A" baseUri
@@ -98,7 +129,7 @@ let app =
     application {
         service_config configureServices
         use_router (apiRoutes)
-        use_router webRoutes
+        use_router (webRoutes appConfig)
     }
 
 
@@ -106,11 +137,14 @@ let app =
 let main argv =
     printfn "Hello World from F#!"
 
+    let appConfig = readConfig()
+    printfn "==> AppConfig: %A" appConfig
+
     let sbconnection =
         System.Environment.GetEnvironmentVariable("SB_CONNECTIONSTRING")
 
     printfn "==> Hello conn: %s" sbconnection
-    run (app)
+    run (app appConfig)
     0
 
 (*

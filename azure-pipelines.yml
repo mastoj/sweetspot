@@ -32,7 +32,7 @@ stages:
       inputs:
         targetType: inline
         script: |
-          make publish
+          make publish-docker
 - stage: DeployDev
   pool:
     vmImage: 'ubuntu-latest'

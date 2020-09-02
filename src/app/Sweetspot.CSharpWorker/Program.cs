@@ -53,7 +53,7 @@ namespace Sweetspot.CSharpWorker
 
         private static AppConfig GetAppConfig()
         {
-            var subEndpoint = System.Environment.GetEnvironmentVariable("SB_SAMPLE_ENDPOINT_SEND");
+            var subEndpoint = System.Environment.GetEnvironmentVariable("SB_SAMPLE_ENDPOINT_LISTEN");
             var subName = System.Environment.GetEnvironmentVariable("SB_SAMPLE_SUBSCRIPTION");
             return new AppConfig(subName, subEndpoint);
         }

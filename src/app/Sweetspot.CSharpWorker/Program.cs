@@ -21,6 +21,11 @@ namespace Sweetspot.CSharpWorker
             SubscriptionName = subscriptionName;
             SubEndpoint = subEndpoint;
         }
+
+        public override string ToString()
+        {
+            return $"SubscriptionName: {SubscriptionName}, SubEndpoint: {SubEndpoint}";
+        }
     }
 
     public class Program
@@ -28,6 +33,7 @@ namespace Sweetspot.CSharpWorker
         public static void Main(string[] args)
         {
             var appConfig = GetAppConfig();
+            Console.WriteLine("==> Config: " + appConfig);
             var subConnectionString = new ServiceBusConnectionStringBuilder(appConfig.SubEndpoint);
             var subClient = new Microsoft.Azure.ServiceBus.SubscriptionClient(subConnectionString, appConfig.SubscriptionName);
             subClient.RegisterMessageHandler(HandleMessage, ErrorHandler);

@@ -9,30 +9,31 @@ open System.Net.Http
 open System.Text.Json
 open Microsoft.Azure.ServiceBus
 
-type AppConfig = {
-    TopicName: string
-    TopicEndpoint: string
-}
+type AppConfig =
+    { TopicName: string
+      TopicEndpoint: string }
 
-let readConfig() = 
-    {
-        TopicName = System.Environment.GetEnvironmentVariable("SB_SAMPLE_TOPIC")
-        TopicEndpoint = System.Environment.GetEnvironmentVariable("SB_SAMPLE_ENDPOINT_SEND")
-    }
+let readConfig () =
+    { TopicName = System.Environment.GetEnvironmentVariable("SB_SAMPLE_TOPIC")
+      TopicEndpoint = System.Environment.GetEnvironmentVariable("SB_SAMPLE_ENDPOINT_SEND") }
 
 module ServiceBus =
     let createTopicClient topicEndpoint =
-        let stringBuilder = ServiceBusConnectionStringBuilder(topicEndpoint)
+        let stringBuilder =
+            ServiceBusConnectionStringBuilder(topicEndpoint)
+
         TopicClient(stringBuilder)
-    
+
     let sendMessage (topicClient: TopicClient) msg =
         async {
             try
                 let messageBody = sprintf "Message: %A" msg
-                let message = Message(System.Text.Encoding.UTF8.GetBytes messageBody)
+
+                let message =
+                    Message(System.Text.Encoding.UTF8.GetBytes messageBody)
+
                 do! topicClient.SendAsync(message) |> Async.AwaitTask
-            with ex ->
-                printfn "%O :: Exception: %s" DateTime.Now ex.Message
+            with ex -> printfn "%O :: Exception: %s" DateTime.Now ex.Message
         }
 
 [<CLIMutable>]
@@ -96,13 +97,18 @@ let getServiceUri (sp: IServiceProvider) (tyeName: string) (serviceName: string)
 
 let helloHandler appConfig next (ctx: HttpContext) =
     let weatherClient: WeatherClient = ctx.GetService<WeatherClient>()
-    let topicClient = ServiceBus.createTopicClient appConfig.TopicEndpoint
+
+    let topicClient =
+        ServiceBus.createTopicClient appConfig.TopicEndpoint
+
     printfn "==> Making request"
     task {
-        do! "hello world service bus" |> ServiceBus.sendMessage topicClient
+        do! "hello world service bus"
+            |> ServiceBus.sendMessage topicClient
 
         let! response = weatherClient.GetWeather()
         printfn "==> Got some response: %A" response
+
         let response =
             { Wat = (sprintf "Hello again wat: %A" response) }
 
@@ -112,7 +118,8 @@ let helloHandler appConfig next (ctx: HttpContext) =
 let apiRoutes =
     router { post "/api/messages" messagesHandler }
 
-let webRoutes appConfig = router { get "/" (helloHandler appConfig) }
+let webRoutes appConfig =
+    router { get "/" (helloHandler appConfig) }
 
 let app appConfig =
 
@@ -137,7 +144,7 @@ let app appConfig =
 let main argv =
     printfn "Hello World from F#!"
 
-    let appConfig = readConfig()
+    let appConfig = readConfig ()
     printfn "==> AppConfig: %A" appConfig
 
     let sbconnection =

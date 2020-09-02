@@ -41,7 +41,7 @@ let deployWeb webName (secret: Secret) (k8sProvider: Pulumi.Kubernetes.Provider)
         addSecret "SB_SAMPLE_TOPIC" "SB_SAMPLE_TOPIC" secret
 
     let addSendEndpointSecret =
-        addSecret "SB_SAMPLE_ENDPOINT_LISTEN" "SB_SAMPLE_ENDPOINT_LISTEN" secret
+        addSecret "SB_SAMPLE_ENDPOINT_SEND" "SB_SAMPLE_ENDPOINT_SEND" secret
 
     createApplicationConfig (ApplicationName webName) (ImageName "sweetspot.web")
     |> (addSampleTopicSecret >> addSendEndpointSecret)
@@ -54,7 +54,7 @@ let deployWorker workerName (secret: Secret) (k8sProvider: Pulumi.Kubernetes.Pro
         addSecret "SB_SAMPLE_SUBSCRIPTION" "SB_SAMPLE_SUBSCRIPTION" secret
 
     let addListenEndpointSecret =
-        addSecret "SB_SAMPLE_ENDPOINT_SEND" "SB_SAMPLE_ENDPOINT_SEND" secret
+        addSecret "SB_SAMPLE_ENDPOINT_LISTEN" "SB_SAMPLE_ENDPOINT_LISTEN" secret
 
     createApplicationConfig (ApplicationName workerName) (ImageName "sweetspot.csharpworker")
     |> (addSampleSubscriptionSecret

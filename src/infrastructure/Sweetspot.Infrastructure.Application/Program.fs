@@ -28,9 +28,9 @@ let getServiceBusInputMap (infrastructure: Infrastructure) stack =
 
     let topicName = getStackOutput topicKey stack
 
-    [ (sprintf "SB_%s_TOPIC" topicKey).ToUpper(), io (sendEndpoint.Apply(fun s -> s |> toBase64))
+    [ (sprintf "SB_%s_TOPIC" topicKey).ToUpper(), io (topicName.Apply(fun s -> s |> toBase64))
       (sprintf "SB_%s_ENDPOINT_LISTEN" topicKey).ToUpper(), io (listenEndpoint.Apply(fun s -> s |> toBase64))
-      (sprintf "SB_%s_ENDPOINT_SEND" topicKey).ToUpper(), io (topicName.Apply(fun s -> s |> toBase64))
+      (sprintf "SB_%s_ENDPOINT_SEND" topicKey).ToUpper(), io (sendEndpoint.Apply(fun s -> s |> toBase64))
       (sprintf "SB_%s_SUBSCRIPTION" topicKey).ToUpper(),
       io (infrastructure.Subscription.Name.Apply(fun s -> s |> toBase64)) ]
     |> inputMap

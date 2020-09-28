@@ -1,3 +1,4 @@
 Saturn
 FSharp.Core
 Microsoft.Tye.Extensions.Configuration
+Microsoft.Azure.ServiceBus

@@ -13,11 +13,21 @@ restore-tool: ## Restore tools
 build: restore-tool ## Build apps
 	dotnet fake build target BuildApp
 
-publish: restore-tool ## Build and publish apps
-	dotnet fake build target Publish
+publish-docker: restore-tool ## Build and publish apps
+	dotnet fake build target PublishDocker
 
 deploy: restore-tool ## Deploys the apps
 	dotnet fake build target Deploy
 
+format: restore-tool ## Format code
+	dotnet fake build target Format
+
 deploy-core-infra: ## Deploys the core infrastructure
 	pulumi up -y -C src/infrastructure/Sweetspot.Infrastructure.Core
+
+kubedev: ## Get dev kubeconfig and export config variable
+	pulumi stack output kubeconfig --show-secrets -C src/infrastructure/Sweetspot.Infrastructure.Core > kubeconfig.yaml
+	echo "Run > export KUBECONFIG=`pwd`/kubeconfig.yaml"
+
+devconfig: ## Configure dev env variables
+	scripts/set_dev_env.sh

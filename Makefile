@@ -31,3 +31,9 @@ kubedev: ## Get dev kubeconfig and export config variable
 
 devconfig: ## Configure dev env variables
 	scripts/set_dev_env.sh
+
+destroy: ## Delete all resources
+	pulumi destroy -y -C srC/infrastructure/Sweetspot.Infrastructure.Application
+	pulumi destroy -y -C srC/infrastructure/Sweetspot.Infrastructure.Publish
+	pulumi destroy -y -C srC/infrastructure/Sweetspot.Infrastructure.Core
+	

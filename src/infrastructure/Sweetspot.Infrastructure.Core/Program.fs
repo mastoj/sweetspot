@@ -227,6 +227,145 @@ module Helpers =
           ReadConnectionString = topicReadRule.PrimaryConnectionString
           SendReadConnectionString = topicSendListenRule.PrimaryConnectionString }
 
+module Kafka =
+    open Pulumi.Kubernetes.Apps.V1
+    open Pulumi.Kubernetes.Types.Inputs.Apps.V1
+    open Pulumi.Kubernetes.Types.Inputs.Core.V1
+    open Pulumi.Kubernetes.Types.Inputs.Meta.V1
+    open Pulumi.Kubernetes.Core.V1
+
+
+    let createTcpPortList ports =
+        ports
+        |> List.map (fun (name, port) ->
+            ServicePortArgs(Name = input name, Port = input port, Protocol = input "TCP")
+            |> input
+        )
+        |> inputList
+
+
+    let createZookeper provider =
+        let customResourceOptions =
+            CustomResourceOptions(
+                Provider = provider
+            )
+        let matchLabels = inputMap ["app", input "zookepper-1"] 
+
+        let zookeeperContainer =
+            inputList [
+                input (
+                    ContainerArgs(
+                        Name = input "zoo1",
+                        Image = input "digitalwonderland/zookeeper",
+                        Ports = (
+                            inputList [
+                                input (
+                                    ContainerPortArgs(
+                                        ContainerPortValue = input 2181
+                                    )
+                                )
+                            ]),
+                        Env = (
+                            inputList [
+                                input (
+                                    EnvVarArgs(
+                                        Name = input "ZOOKEEPER_ID",
+                                        Value = input "1"
+                                    )
+                                )
+                                input (
+                                    EnvVarArgs(
+                                        Name = input "ZOOKEEPER_SERVER_1",
+                                        Value = input "zoo1"
+                                    )
+                                )
+                            ]
+                        )
+                    )
+                )
+            ]
+
+        let deployment = 
+            Deployment("zookeeper-deploy",
+                DeploymentArgs(
+                    Metadata =
+                        input (
+                            ObjectMetaArgs(
+                                Name = input "zookepper-deploy"
+                            )
+                        ),
+                    Spec =
+                        input 
+                            (DeploymentSpecArgs(
+                                Replicas = input 2,
+                                Selector = input (LabelSelectorArgs(MatchLabels = matchLabels)),
+                                Template =
+                                    input (
+                                        PodTemplateSpecArgs(
+                                            Metadata = 
+                                                input (
+                                                    ObjectMetaArgs(
+                                                        Labels = matchLabels)),
+                                            Spec = 
+                                                input (
+                                                    PodSpecArgs(
+                                                        Containers = zookeeperContainer
+                                                    ))
+                                        )
+                                    ) 
+                            ))
+                ),
+                options = customResourceOptions)
+
+        let service = 
+            Service("zoo1",
+                ServiceArgs(
+                    Metadata =
+                        input (
+                            ObjectMetaArgs(
+                                Name = input "zookepper-deploy",
+                                Labels = matchLabels
+                            )
+                        ),
+                    Spec =
+                        input (
+                            ServiceSpecArgs(
+                                Selector = matchLabels,
+                                Ports = (createTcpPortList [ "client", 2181; "follower", 2888; "leader", 3888 ])
+                            )
+                        )
+                ),
+                options = customResourceOptions
+            )
+
+        service
+
+    let kafkaService provider =
+        let customResourceOptions =
+            CustomResourceOptions(
+                Provider = provider
+            )
+
+        Service("kafka-service",
+            ServiceArgs(
+                Metadata = 
+                    input (
+                        ObjectMetaArgs(
+                            Name = input "kafka-service",
+                            Labels = inputMap ["name", input "kafka"]
+                        )
+                    ),
+                Spec =
+                    input (
+                        ServiceSpecArgs(
+                            Type = input "LoadBalancer",
+                            Ports = (createTcpPortList ["kafka-port", 9092])
+                        )
+                    )
+            ),
+            options = customResourceOptions)
+
+
 let infra () =
     let resourceGroupName = "sweetspot-rg"
 
@@ -298,6 +437,9 @@ let infra () =
     let options =
         ComponentResourceOptions(Provider = provider)
 
+    let zooKeeper =  Kafka.createZookeper provider
+    let kafka = Kafka.kafkaService provider
+
     ConfigFile("linkerd", ConfigFileArgs(File = input "manifests/linkerd.yaml"), options = options)
     |> ignore
 
@@ -336,7 +478,9 @@ let infra () =
            ("registryAdminPassword", adminPassword :> obj)
            ("servicebusNamespace", servicebusNamespace.Name :> obj)
            ("sbConnectionstring", sbConnectionstring :> obj)
-           ("location", resourceGroup.Location :> obj) ]
+           ("location", resourceGroup.Location :> obj) 
+           ("kafka", kafka.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)
+           ("zookeeper", zooKeeper.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)]
          @ topicOutputs)
 
 [<EntryPoint>]

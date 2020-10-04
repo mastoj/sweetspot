@@ -249,7 +249,7 @@ module Kafka =
             CustomResourceOptions(
                 Provider = provider
             )
-        let matchLabels = inputMap ["app", input "zookepper-1"] 
+        let matchLabels = inputMap ["app", input "zookeeper-1"] 
 
         let zookeeperContainer =
             inputList [
@@ -291,7 +291,7 @@ module Kafka =
                     Metadata =
                         input (
                             ObjectMetaArgs(
-                                Name = input "zookepper-deploy"
+                                Name = input "zookeeper-deploy"
                             )
                         ),
                     Spec =
@@ -323,7 +323,7 @@ module Kafka =
                     Metadata =
                         input (
                             ObjectMetaArgs(
-                                Name = input "zookepper-deploy",
+                                Name = input "zoo1",
                                 Labels = matchLabels
                             )
                         ),

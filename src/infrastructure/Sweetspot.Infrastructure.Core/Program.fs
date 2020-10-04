@@ -367,6 +367,73 @@ module Kafka =
             options = customResourceOptions)
 
 
+    let brokerContainer = 
+            inputList [
+                input (
+                    ContainerArgs(
+                        Name = input "kafka",
+                        Image = input "wurstmeister/kafka",
+                        Ports = (
+                            inputList [
+                                input (
+                                    ContainerPortArgs(
+                                        ContainerPortValue = input 9092
+                                    )
+                                )
+                            ]),
+                        Env = (
+                            [
+                                "KAFKA_ADVERTISED_PORT", "30718"
+                                "KAFKA_ADVERTISED_HOST_NAME", "192.168.1.240"
+                                "KAFKA_ZOOKEEPER_CONNECT", "zoo1:2181"
+                                "KAFKA_BROKER_ID", "0"
+                                "KAFKA_CREATE_TOPICS", "admintome-test:1:1"
+                            ]
+                            |> List.map (fun (n, v) -> EnvVarArgs(Name = input n, Value = input v) |> input)
+                            |> inputList)
+                        )
+                    )
+            ]
+
+    let createKafkaBroker provider = 
+        let customResourceOptions = CustomResourceOptions(Provider = provider)
+        Deployment("kafka-broker",
+            DeploymentArgs(
+                Metadata =
+                    input (
+                        ObjectMetaArgs(
+                            Name = input "kafka-broker0"
+                        )
+                    ),
+                Spec = 
+                    input (
+                        DeploymentSpecArgs(
+                            Replicas = input 2,
+                            Selector =
+                                input (
+                                    LabelSelectorArgs(
+                                        MatchLabels = inputMap ["app", input "kafka"; "id", input "0"]
+                                    )
+                                ),
+                            Template = 
+                                input (
+                                    PodTemplateSpecArgs(
+                                        Metadata = 
+                                            input (
+                                                ObjectMetaArgs(
+                                                    Labels = inputMap ["app", input "kafka"; "id", input "0"])),
+                                        Spec = 
+                                            input (
+                                                PodSpecArgs(
+                                                    Containers = brokerContainer
+                                                ))
+                                    )
+                                ) 
+                        )
+            )),
+            options = customResourceOptions
+        )
+
 let infra () =
     let resourceGroupName = "sweetspot-rg"
 
@@ -440,6 +507,7 @@ let infra () =
 
     let zooKeeper =  Kafka.createZookeper provider
     let kafka = Kafka.kafkaService provider
+    let broker = Kafka.createKafkaBroker provider
 
     ConfigFile("linkerd", ConfigFileArgs(File = input "manifests/linkerd.yaml"), options = options)
     |> ignore
@@ -480,8 +548,7 @@ let infra () =
            ("servicebusNamespace", servicebusNamespace.Name :> obj)
            ("sbConnectionstring", sbConnectionstring :> obj)
            ("location", resourceGroup.Location :> obj) 
-           ("kafka", kafka.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)
-           ("zookeeper", zooKeeper.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)]
+           ("kafka", kafka.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)]
          @ topicOutputs)
 
 [<EntryPoint>]

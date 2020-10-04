@@ -359,7 +359,8 @@ module Kafka =
                     input (
                         ServiceSpecArgs(
                             Type = input "LoadBalancer",
-                            Ports = (createTcpPortList ["kafka-port", 9092])
+                            Ports = (createTcpPortList ["kafka-port", 9092]),
+                            Selector = inputMap ["app", input "kafka"; "id", input "0"]
                         )
                     )
             ),

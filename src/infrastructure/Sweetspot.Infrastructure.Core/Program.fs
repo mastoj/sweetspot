@@ -239,200 +239,128 @@ module Kafka =
         ports
         |> List.map (fun (name, port) ->
             ServicePortArgs(Name = input name, Port = input port, Protocol = input "TCP")
-            |> input
-        )
+            |> input)
         |> inputList
 
 
     let createZookeper provider =
         let customResourceOptions =
-            CustomResourceOptions(
-                Provider = provider
-            )
-        let matchLabels = inputMap ["app", input "zookeeper-1"] 
+            CustomResourceOptions(Provider = provider)
+
+        let matchLabels = inputMap [ "app", input "zookeeper-1" ]
 
         let zookeeperContainer =
-            inputList [
-                input (
-                    ContainerArgs(
-                        Name = input "zoo1",
-                        Image = input "digitalwonderland/zookeeper",
-                        Ports = (
-                            inputList [
-                                input (
-                                    ContainerPortArgs(
-                                        ContainerPortValue = input 2181
-                                    )
-                                )
-                            ]),
-                        Env = (
-                            inputList [
-                                input (
-                                    EnvVarArgs(
-                                        Name = input "ZOOKEEPER_ID",
-                                        Value = input "1"
-                                    )
-                                )
-                                input (
-                                    EnvVarArgs(
-                                        Name = input "ZOOKEEPER_SERVER_1",
-                                        Value = input "zoo1"
-                                    )
-                                )
-                            ]
-                        )
-                    )
-                )
-            ]
+            inputList [ input
+                            (ContainerArgs
+                                (Name = input "zoo1",
+                                 Image = input "digitalwonderland/zookeeper",
+                                 Ports = (inputList [ input (ContainerPortArgs(ContainerPortValue = input 2181)) ]),
+                                 Env =
+                                     (inputList [ input (EnvVarArgs(Name = input "ZOOKEEPER_ID", Value = input "1"))
+                                                  input
+                                                      (EnvVarArgs
+                                                          (Name = input "ZOOKEEPER_SERVER_1", Value = input "zoo1")) ]))) ]
 
-        let deployment = 
-            Deployment("zookeeper-deploy",
-                DeploymentArgs(
-                    Metadata =
-                        input (
-                            ObjectMetaArgs(
-                                Name = input "zookeeper-deploy"
-                            )
-                        ),
-                    Spec =
-                        input 
-                            (DeploymentSpecArgs(
-                                Replicas = input 2,
-                                Selector = input (LabelSelectorArgs(MatchLabels = matchLabels)),
-                                Template =
-                                    input (
-                                        PodTemplateSpecArgs(
-                                            Metadata = 
-                                                input (
-                                                    ObjectMetaArgs(
-                                                        Labels = matchLabels)),
-                                            Spec = 
-                                                input (
-                                                    PodSpecArgs(
-                                                        Containers = zookeeperContainer
-                                                    ))
-                                        )
-                                    ) 
-                            ))
-                ),
-                options = customResourceOptions)
+        let deployment =
+            Deployment
+                ("zookeeper-deploy",
+                 DeploymentArgs
+                     (Metadata = input (ObjectMetaArgs(Name = input "zookeeper-deploy")),
+                      Spec =
+                          input
+                              (DeploymentSpecArgs
+                                  (Replicas = input 2,
+                                   Selector = input (LabelSelectorArgs(MatchLabels = matchLabels)),
+                                   Template =
+                                       input
+                                           (PodTemplateSpecArgs
+                                               (Metadata = input (ObjectMetaArgs(Labels = matchLabels)),
+                                                Spec = input (PodSpecArgs(Containers = zookeeperContainer))))))),
+                 options = customResourceOptions)
 
-        let service = 
-            Service("zoo1",
-                ServiceArgs(
-                    Metadata =
-                        input (
-                            ObjectMetaArgs(
-                                Name = input "zoo1",
-                                Labels = matchLabels
-                            )
-                        ),
-                    Spec =
-                        input (
-                            ServiceSpecArgs(
-                                Selector = matchLabels,
-                                Ports = (createTcpPortList [ "client", 2181; "follower", 2888; "leader", 3888 ])
-                            )
-                        )
-                ),
-                options = customResourceOptions
-            )
+        let service =
+            Service
+                ("zoo1",
+                 ServiceArgs
+                     (Metadata = input (ObjectMetaArgs(Name = input "zoo1", Labels = matchLabels)),
+                      Spec =
+                          input
+                              (ServiceSpecArgs
+                                  (Selector = matchLabels,
+                                   Ports =
+                                       (createTcpPortList [ "client", 2181
+                                                            "follower", 2888
+                                                            "leader", 3888 ])))),
+                 options = customResourceOptions)
 
         service
 
     let kafkaService provider =
         let customResourceOptions =
-            CustomResourceOptions(
-                Provider = provider
-            )
+            CustomResourceOptions(Provider = provider)
 
-        Service("kafka-service",
-            ServiceArgs(
-                Metadata = 
-                    input (
-                        ObjectMetaArgs(
-                            Name = input "kafka-service",
-                            Labels = inputMap ["name", input "kafka"]
-                        )
-                    ),
-                Spec =
-                    input (
-                        ServiceSpecArgs(
-                            Type = input "LoadBalancer",
-                            Ports = (createTcpPortList ["kafka-port", 9092]),
-                            Selector = inputMap ["app", input "kafka"; "id", input "0"]
-                        )
-                    )
-            ),
-            options = customResourceOptions)
+        Service
+            ("kafka-service",
+             ServiceArgs
+                 (Metadata =
+                     input (ObjectMetaArgs(Name = input "kafka-service", Labels = inputMap [ "name", input "kafka" ])),
+                  Spec =
+                      input
+                          (ServiceSpecArgs
+                              (Type = input "LoadBalancer",
+                               Ports = (createTcpPortList [ "kafka-port", 9092 ]),
+                               Selector =
+                                   inputMap [ "app", input "kafka"
+                                              "id", input "0" ]))),
+             options = customResourceOptions)
 
 
-    let brokerContainer = 
-            inputList [
-                input (
-                    ContainerArgs(
-                        Name = input "kafka",
-                        Image = input "wurstmeister/kafka",
-                        Ports = (
-                            inputList [
-                                input (
-                                    ContainerPortArgs(
-                                        ContainerPortValue = input 9092
-                                    )
-                                )
-                            ]),
-                        Env = (
-                            [
-                                "KAFKA_ADVERTISED_PORT", "30718"
-                                "KAFKA_ADVERTISED_HOST_NAME", "192.168.1.240"
-                                "KAFKA_ZOOKEEPER_CONNECT", "zoo1:2181"
-                                "KAFKA_BROKER_ID", "0"
-                                "KAFKA_CREATE_TOPICS", "admintome-test:1:1"
-                            ]
-                            |> List.map (fun (n, v) -> EnvVarArgs(Name = input n, Value = input v) |> input)
-                            |> inputList)
-                        )
-                    )
-            ]
+    let brokerContainer =
+        inputList [ input
+                        (ContainerArgs
+                            (Name = input "kafka",
+                             Image = input "wurstmeister/kafka",
+                             Ports = (inputList [ input (ContainerPortArgs(ContainerPortValue = input 9092)) ]),
+                             Env =
+                                 ([ "KAFKA_ADVERTISED_PORT", "30718"
+                                    "KAFKA_ADVERTISED_HOST_NAME", "192.168.1.240"
+                                    "KAFKA_ZOOKEEPER_CONNECT", "zoo1:2181"
+                                    "KAFKA_BROKER_ID", "0"
+                                    "KAFKA_CREATE_TOPICS", "admintome-test:1:1" ]
+                                  |> List.map (fun (n, v) ->
+                                      EnvVarArgs(Name = input n, Value = input v)
+                                      |> input)
+                                  |> inputList))) ]
 
-    let createKafkaBroker provider = 
-        let customResourceOptions = CustomResourceOptions(Provider = provider)
-        Deployment("kafka-broker",
-            DeploymentArgs(
-                Metadata =
-                    input (
-                        ObjectMetaArgs(
-                            Name = input "kafka-broker0"
-                        )
-                    ),
-                Spec = 
-                    input (
-                        DeploymentSpecArgs(
-                            Replicas = input 2,
-                            Selector =
-                                input (
-                                    LabelSelectorArgs(
-                                        MatchLabels = inputMap ["app", input "kafka"; "id", input "0"]
-                                    )
-                                ),
-                            Template = 
-                                input (
-                                    PodTemplateSpecArgs(
-                                        Metadata = 
-                                            input (
-                                                ObjectMetaArgs(
-                                                    Labels = inputMap ["app", input "kafka"; "id", input "0"])),
-                                        Spec = 
-                                            input (
-                                                PodSpecArgs(
-                                                    Containers = brokerContainer
-                                                ))
-                                    )
-                                ) 
-                        )
-            )),
-            options = customResourceOptions
-        )
+    let createKafkaBroker provider =
+        let customResourceOptions =
+            CustomResourceOptions(Provider = provider)
+
+        Deployment
+            ("kafka-broker",
+             DeploymentArgs
+                 (Metadata = input (ObjectMetaArgs(Name = input "kafka-broker0")),
+                  Spec =
+                      input
+                          (DeploymentSpecArgs
+                              (Replicas = input 2,
+                               Selector =
+                                   input
+                                       (LabelSelectorArgs
+                                           (MatchLabels =
+                                               inputMap [ "app", input "kafka"
+                                                          "id", input "0" ])),
+                               Template =
+                                   input
+                                       (PodTemplateSpecArgs
+                                           (Metadata =
+                                               input
+                                                   (ObjectMetaArgs
+                                                       (Labels =
+                                                           inputMap [ "app", input "kafka"
+                                                                      "id", input "0" ])),
+                                            Spec = input (PodSpecArgs(Containers = brokerContainer))))))),
+             options = customResourceOptions)
 
 let infra () =
     let resourceGroupName = "sweetspot-rg"
@@ -505,7 +433,7 @@ let infra () =
     let options =
         ComponentResourceOptions(Provider = provider)
 
-    let zooKeeper =  Kafka.createZookeper provider
+    let zooKeeper = Kafka.createZookeper provider
     let kafka = Kafka.kafkaService provider
     let broker = Kafka.createKafkaBroker provider
 
@@ -547,8 +475,8 @@ let infra () =
            ("registryAdminPassword", adminPassword :> obj)
            ("servicebusNamespace", servicebusNamespace.Name :> obj)
            ("sbConnectionstring", sbConnectionstring :> obj)
-           ("location", resourceGroup.Location :> obj) 
-           ("kafka", kafka.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj)]
+           ("location", resourceGroup.Location :> obj)
+           ("kafka", kafka.Status.Apply(fun s -> s.LoadBalancer.Ingress.[0].Ip) :> obj) ]
          @ topicOutputs)
 
 [<EntryPoint>]
